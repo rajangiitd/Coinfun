@@ -1,10 +1,17 @@
 import mysql.connector
-import helper_functions
+import encryption_scheme
 import os
 import random
 import json
-import re
 from datetime import datetime, timedelta
+import read_n_write_image_with_sql
+from collections import defaultdict
+
+#### It set ups all the tables with fake data ####
+#### It assumes profile_pics folder to be present in the same directory as this file ####
+#### It assumes that the database is already created ####
+#### It assumes that the tables are already created and are empty ####
+#### It assumes payment_images folder to be present in the same directory as this file ####
 
 mydb = mysql.connector.connect(
   host="localhost",
@@ -14,7 +21,6 @@ mydb = mysql.connector.connect(
 )
 
 # Define the list of available cryptocurrencies
-# CRYPTO_LIST = ['BTC', 'ETH', 'BNB', 'DOGE', 'XRP', 'MATIC', 'ADA', 'SOL', 'SHIB', 'LTC']
 CRYPTO_LIST = ['BTC', 'ETH', 'BNB', 'DOGE', 'XRP', 'MATIC', 'ADA', 'SOL']
 CRYPTO_PRICE = {'BTC': 25000, 'ETH': 2000, 'BNB': 320, 'DOGE': 0.08, 'XRP': 0.5, 'MATIC': 0.6, 'ADA': 0.4, 'SOL': 20}
 
@@ -23,43 +29,17 @@ CRYPTO_PRICE = {'BTC': 25000, 'ETH': 2000, 'BNB': 320, 'DOGE': 0.08, 'XRP': 0.5,
 USDT_RANGE = (5000, 50000)
 IN_BID_USDT_RANGE = (0, 10000)
 
-def convertToBinaryData(filename):    # Convert profile picture to BLOB format
-    # Convert digital data to binary format
-    with open(filename, 'rb') as file:
-        binaryData = file.read()
-    return binaryData
-
-def replace_special_characters(s):    # Replace special characters in inputword with underscore
-    return re.sub(r'\W+', '_', s)
-
 mycursor = mydb.cursor()            # Code assumes profile_pics folder to be present in the same directory as this file
 
 KYC_users = []
-
-# create a new table for a user (Helper Function)
-
-def create_user_table(email_id):
-    # replace special characters in email_id to create a valid table name
-    table_name = replace_special_characters(email_id)
-    
-    # MySQL query to create a new table
-    create_query = f"CREATE TABLE {table_name} (crypto_name VARCHAR(255) NOT NULL, crypto_price DECIMAL(10,4) NOT NULL, order_type VARCHAR(4) NOT NULL, crypto_amount DECIMAL(18,8) NOT NULL, timestamp TIMESTAMP NOT NULL)"
-    
-    try:
-        # execute the create query
-        mycursor.execute(create_query)
-        mydb.commit()
-        return 1
-    except Exception as e:
-        return 0
       
 # Insert fake data into trading history table i.e. table with table name = table_name (Helper Function)
 
 def insert_fake_trading_history_data(email_id):
-    table_name = replace_special_characters(email_id)
     wallet_ = {'USDT': 100000000000}
     for crypto in CRYPTO_LIST:
           wallet_[crypto] = 0
+
     # generate 5 to 50 transactions
     if(random.randint(0,1)==0):
       num_transactions = random.randint(2, 6)
@@ -97,9 +77,9 @@ def insert_fake_trading_history_data(email_id):
         else:
             timestamp = last_transaction_time + timedelta(minutes=random.randint(30, 60))
 
-        # MySQL query to insert data into the table
-        sql = f"INSERT INTO {table_name} (crypto_name, crypto_price, order_type, crypto_amount, timestamp) VALUES (%s, %s, %s, %s, %s)"
-        val = (crypto, crypto_price, order_type, crypto_amount, timestamp)
+        # MySQL query to insert data into the CryptoTradingHistoryData table
+        sql = "INSERT INTO CryptoTradingHistoryData (email_id, crypto_name, crypto_price, order_type, crypto_amount, timestamp) VALUES (%s, %s, %s, %s, %s, %s)"
+        val = (email_id, crypto, crypto_price, order_type, crypto_amount, timestamp)
         mycursor.execute(sql, val)
         mydb.commit()
         
@@ -109,7 +89,7 @@ def insert_fake_trading_history_data(email_id):
     return wallet_
 
 
-def generate_fake_userinfo_data(num_users):
+def generate_fake_userinfo_p2pbidding_crptotradinghistory_data(num_users):
     # Insert 20 fake users in userinfo table
     # having columns as email_id, username, password, wallet, favourites, profile_pic, kyc, contact
     for i in range(1, num_users+1):
@@ -120,10 +100,11 @@ def generate_fake_userinfo_data(num_users):
         contact = "9" + str(random.randint(100000000000, 999999999999))
         favourites = random.sample(CRYPTO_LIST, random.randint(0, len(CRYPTO_LIST)-2))
         favourites = ",".join(favourites)
-        password = helper_functions.encrypt_password(username+username)
+        password = encryption_scheme.encrypt_password(username+username)
         
         # Select profile picture for the user based on their username
-        profile_pic_path = f"profile_pics/{username}.jpg"
+        profile_pic_path = os.path.join("profile_pics",f"{username}.jpg")  # must be stable!
+        #profile_pic_path = f"profile_pics/{username}.jpg"    # works fine in laptop, but may get unstable
         if not os.path.exists(profile_pic_path):
             profile_pic_path = f"profile_pics/{username}.jpeg"
         if not os.path.exists(profile_pic_path):
@@ -153,7 +134,7 @@ def generate_fake_userinfo_data(num_users):
         
         # Insert the user data into the database
         sql = "INSERT INTO userinfo (email_id, username, password, wallet, favourites, profile_pic, kyc, contact) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-        val = (email_id, username, password, json.dumps(wallet), favourites, convertToBinaryData(profile_pic_path), kyc, contact)
+        val = (email_id, username, password, json.dumps(wallet), favourites, read_n_write_image_with_sql.convert_to_writable(profile_pic_path), kyc, contact)
         mycursor.execute(sql, val)
         mydb.commit()   # userinfo table done 
         
@@ -183,10 +164,7 @@ def generate_fake_userinfo_data(num_users):
         #print("P2PBiddingData table data addition done")
         # P2PBiddingData table done
         
-        # Making table for history of crypto trading for each user
-        create_user_table(email_id)
-        #print("Created user table for user:", email_id)
-        # Inserting data into the table such that sum of net crypto transactions is equal to the amount in wallet
+        # Making table for history of crypto trading for each user and updating the wallet sensibly
         if(kyc==True):
           wallet_final = insert_fake_trading_history_data(email_id)
           for item in wallet_final:
@@ -196,8 +174,92 @@ def generate_fake_userinfo_data(num_users):
           values = (json.dumps(wallet), email_id)
           mycursor.execute(query, values)
           mydb.commit()
-          #print("Updated userinfo table with new wallet")
-          #print("Last wallet", wallet)
-        print("Person{i} data added",i)
+          KYC_users.append(email_id)
+
+        print(f"User {username} added to database")
+          
+def generate_chat_object(id1, id2):
+    chat = {}
+    messages = []
+    
+    # First message
+    first_sender = random.choice([id1, id2])
+    messages.append({"sender": first_sender, 
+                     "message": random.choice(["Hi", "Hello", "How are you?"]), 
+                     "image": None,
+                     "timestamp": datetime.now().isoformat() })
+    
+    # Second message
+    second_sender = id1 if first_sender == id2 else id2
+    image_path = os.path.join("payment_images", random.choice(os.listdir("payment_images")))
+
+    image_type = os.path.splitext(image_path)[1][1:]
+    image_data_b64 = read_n_write_image_with_sql.convert_to_writable(image_path)
+    
+    next_timestamp = datetime.now() + timedelta(minutes=1)
+    
+    messages.append({"sender": second_sender, 
+                     "message": None, 
+                     "image": {"name": os.path.basename(image_path), "type": image_type, "data": image_data_b64.decode() },
+                     "timestamp": next_timestamp.isoformat() })
+    
+    # Third message
+    next_timestamp = datetime.now() + timedelta(minutes=2)
+    
+    third_sender = first_sender
+    messages.append({"sender": third_sender, 
+                     "message": random.choice(["Thanks, released!", "Released", "Releasing"]), 
+                     "image": None,
+                     "timestamp": next_timestamp.isoformat()  })
+    
+    # Fourth message
+    next_timestamp = datetime.now() + timedelta(minutes=3)
+    
+    fourth_sender = second_sender
+    messages.append({"sender": fourth_sender, 
+                     "message": "Thanks", 
+                     "image": None,
+                     "timestamp": next_timestamp.isoformat() })
+    
+    # Add all messages to the chat object
+    chat["messages"] = messages    
+    return chat
+
+def generate_fake_P2PTradeHistoryData_chat(datasize):
+  chat_done = defaultdict(bool)
+  for temp in range(2*data_size):
+    random_emails = random.sample(KYC_users, 2)
+    buyer_email_id = random_emails[0]
+    seller_email_id = random_emails[1]
+    
+    # generate random transaction usdt and price
+    transaction_usdt = round(random.uniform(500, 2000), 2)
+    price = round(random.uniform(87, 92), 2)
+    
+    # generate a random timestamp within the last two weeks
+    now = datetime.now()
+    past_date = now - timedelta(days=random.randint(0, 13), hours=random.randint(0, 23), minutes=random.randint(0, 59))
+    timestamp = past_date.strftime('%Y-%m-%d %H:%M:%S')
+    
+    # SQL query to insert data into the P2PTradeHistoryData table
+    sql = f"INSERT INTO P2PTradeHistoryData (buyer_email_id, seller_email_id, transaction_usdt, price, time_stamp) VALUES ('{buyer_email_id}', '{seller_email_id}', {transaction_usdt}, {price}, '{timestamp}')"
+    # execute the query
+    mycursor.execute(sql)
+    mydb.commit()
+    
+    if(buyer_email_id>seller_email_id):
+      buyer_email_id, seller_email_id = seller_email_id, buyer_email_id
+
+    if(chat_done[(buyer_email_id, seller_email_id)]==False):
+      chat_done[(buyer_email_id, seller_email_id)] = True
+      chat = generate_chat_object(buyer_email_id, seller_email_id)
+      sql = "INSERT INTO chat (email_id1, email_id2, chat_messages) VALUES (%s, %s, %s)"
+      val = (buyer_email_id, seller_email_id, json.dumps(chat))
+      mycursor.execute(sql, val)
+      mydb.commit()
+    print("P2PTradeHistoryData and chat table data addition done for ", buyer_email_id, seller_email_id)
         
-generate_fake_userinfo_data(40)
+data_size = 30
+generate_fake_userinfo_p2pbidding_crptotradinghistory_data(data_size)
+print("3 tables done")
+generate_fake_P2PTradeHistoryData_chat(data_size)
