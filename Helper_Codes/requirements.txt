@@ -1,0 +1,14 @@
+pip3 install mysql-connector-python
+python3 -m pip install mysql-connector-python
+
+pip3 install flask
+
+sudo apt-get update
+sudo apt-get install mysql-client
+brew install mysql-client
+export PATH=$PATH:/path/to/mysql/bin
+sudo apt-get install libmysqlclient-dev
+
+pip install mysqlclient
+
+pip3 install flask_mysqldb
