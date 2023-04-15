@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, width=device-width" />
+    <link rel="stylesheet" href="/static/css/global.css" />
+    <link rel="stylesheet" href="/static/css/market_allcrypto.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;900&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Fira Code:wght@400;700&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&display=swap"
+    />
+    <title>market_allcrypto</title>
+  </head>
+  <body>
+    <div class="all-cryptos">
+      <div class="all-cryptos-child"></div>
+      <div class="rectangle-parent" autofocus id="market">
+        <div class="group-child"></div>
+        <div class="market">Market</div>
+      </div>
+      <button class="rectangle-group" autofocus id="p2p_buy">
+        <div class="group-item"></div>
+        <div class="p2p">P2P</div>
+      </button>
+      <div class="rectangle-container" id="logout">
+        <div class="group-inner"></div>
+        <div class="logout">Logout</div>
+      </div>
+      <button class="group-button" autofocus id="dashboard">
+        <div class="rectangle-div"></div>
+        <div class="dashboard">Dashboard</div>
+      </button>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th>24h Change</th>
+            <th>24h Turnover</th>
+            <th>Favourites</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a href="/mark_fav/BTC" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Bitcoin</button></td>
+            <td>{{jsondata[0]['last_price']}}</td>
+            <td>{{jsondata[0]['24h_change']}}</td>
+            <td>{{jsondata[0]['24h_turnover']}}</td>
+            
+              <td>
+                <a href="/mark_fav/BTC" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Mark Favourite</button>
+              </td>
+           
+          </tr>
+            <td><a href="/mark_fav/ETH" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Etherum</button></td>
+            <td>{{jsondata[1]['last_price']}}</td>
+            <td>{{jsondata[1]['24h_change']}}</td>
+            <td>{{jsondata[1]['24h_turnover']}}</td>
+           
+              <td>
+                <a href="/mark_fav/BTC" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Mark Favourite</button>
+              </td>
+           
+          </tr>
+          <tr>
+            <td><a href="/mark_fav/BNB" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Bitcoin</button></td>
+            <td>{{jsondata[2]['last_price']}}</td>
+            <td>{{jsondata[2]['24h_change']}}</td>
+            <td>{{jsondata[2]['24h_turnover']}}</td>
+            
+              <td>
+                <a href="/mark_fav/BNB" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Mark Favourite</button>
+              </td>
+            
+          </tr>
+          <tr>
+            <td><a href="/mark_fav/DOGE" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Dogecoin</button></td>
+            <td>{{jsondata[3]['last_price']}}</td>
+            <td>{{jsondata[3]['24h_change']}}</td>
+            <td>{{jsondata[3]['24h_turnover']}}</td>
+            
+              <td>
+                <a href="/mark_fav/DOGE" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Mark Favourite</button>
+              </td>
+            
+          </tr>
+          
+          <tr>
+            <td><a href="/mark_fav/XRP" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">XRP</button></td>
+            <td>{{jsondata[4]['last_price']}}</td>
+            <td>{{jsondata[4]['24h_change']}}</td>
+            <td>{{jsondata[4]['24h_turnover']}}</td>
+            
+              <td>
+                <a href="/mark_fav/XRP" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Mark Favourite</button>
+              </td>
+            
+          </tr>
+
+          <tr>
+            <td><a href="/mark_fav/MATIC" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Matic</button></td>
+            <td>{{jsondata[5]['last_price']}}</td>
+            <td>{{jsondata[5]['24h_change']}}</td>
+            <td>{{jsondata[5]['24h_turnover']}}</td>
+            
+              <td>
+                <a href="/mark_fav/MATIC" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Mark Favourite</button>
+              </td>
+           
+          </tr>
+
+          <tr>
+            <td><a href="/mark_fav/ADA" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">ADA</button></td>
+            <td>{{jsondata[6]['last_price']}}</td>
+            <td>{{jsondata[6]['24h_change']}}</td>
+            <td>{{jsondata[6]['24h_turnover']}}</td>
+            
+              <td>
+                <a href="/mark_fav/ADA" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Mark Favourite</button>
+              </td>
+            
+          </tr>
+
+          <tr>
+            <td><a href="/mark_fav/SOL" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">SOLANA</button></td>
+            <td>{{jsondata[7]['last_price']}}</td>
+            <td>{{jsondata[7]['24h_change']}}</td>
+            <td>{{jsondata[7]['24h_turnover']}}</td>
+            
+              <td>
+                <a href="/mark_fav/SOL" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Mark Favourite</button>
+              </td>
+           
+          </tr>
+
+          
+        </tbody>
+      </table>
+      
+      <div class="rectangle-parent5">
+        <div class="group-child8"></div>
+        <div class="markets-overview">Markets OverView</div>
+      </div>
+      <div class="all-cryptos-inner" id="groupContainer14" >
+        <div class="rectangle-parent6" >
+          <div class="group-child9" autofocus id="favorites"></div>
+          <img class="image-6-icon" alt="" src="/static/images/non_fav.png" />
+          <div class="favorites">Favorites</div>
+        </div>
+      </div>
+      <div class="all-cryptos-inner1">
+        <div class="rectangle-parent7">
+          <div class="group-child10"></div>
+          <div class="all-cryptos1">All Cryptos</div>
+        </div>
+      </div>
+      <b class="coinfun">Coinfun</b>
+    </div>
+
+    <script>
+      var groupButton = document.getElementById("p2p_buy");
+      if (groupButton) {
+        groupButton.addEventListener("click", function (e) {
+          window.location.href = "/p2p_buy";
+        });
+      }
+      
+      
+      
+      var groupButton1 = document.getElementById("favorites");
+      if (groupButton1) {
+        groupButton1.addEventListener("click", function (e) {
+          window.location.href = "/market_fav";
+
+          // Please sync "dashboard" to the project
+        });
+      }
+      
+      var groupContainer3 = document.getElementById("dashboard");
+      if (groupContainer3) {
+        groupContainer3.addEventListener("click", function (e) {
+          // Please sync "BTC Graph" to the project
+          window.location.href = "/dashboard";
+        });
+      }
+      
+      var groupContainer14 = document.getElementById("logout");
+      if (groupContainer14) {
+        groupContainer14.addEventListener("click", function (e) {
+          window.location.href = "/";
+          // Please sync "Favourites" to the project
+        });
+      }
+      </script>
+  </body>
+</html>

@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}
+transcation-history
+{% endblock title %}
+
+{% block link %}
+rel="stylesheet" href="/static/css/transaction.css"
+{% endblock link %}
+
+{%block body %}
+
+
+<div class="transcation-history">
+
+  <button class="rectangle-parent34" autofocus>
+    <button class="group-child35"></button>
+    <div class="your-transaction-history">Your Transaction History</div>
+  </button>
+
+{% if msg|length > 0 %}
+   <h2>{{msg}}</h2>
+{% else %}
+  <table>
+    <thead>
+      <tr>
+        <th>Date/Time</th>
+        <th>Order Id</th>
+        <th>Order Type</th>
+        <th>Client</th>
+        <th>Amount (USDT)</th>
+        <th>Price</th>
+        <th>Net Balance</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for i in range(data['order_id']|length-1)  %}
+        <tr>
+          <td>2023-04-01 10:00:00</td>
+          <td>{{data['order_id'][i]}}</td>
+          <td>{{data['order_type'][i]}}</td>
+          <td>{{data['client'][i][0]}} <br>{{data['client'][i][1]}}</td>
+          <td>{{data['transaction_usdt'][i]}}</td>
+          <td>81 Rs</td>
+          <td>{{'%0.2f Rs'|format(data['transaction_usdt'][i]*81)}}</td>
+        </tr>
+      {% endfor %}
+
+    </tbody>
+  </table>
+
+{% endif %}
+  
+
+
+  <b class="coinfun3">Coinfun</b>
+</div>
+
+<script>
+  var groupButton = document.getElementById("logout");
+  if (groupButton) {
+    groupButton.addEventListener("click", function (e) {
+      // Please sync "All Cryptos" to the project
+      window.location.href = "/";
+    });
+  }
+
+  var groupButton1 = document.getElementById("p2p");
+  if (groupButton1) {
+    groupButton1.addEventListener("click", function (e) {
+      // Please sync "P2P Buy" to the project
+      window.location.href = "/p2p_buy";
+    });
+  }
+
+  var groupContainer = document.getElementById("market");
+  if (groupContainer) {
+    groupContainer.addEventListener("click", function (e) {
+      // Please sync "login" to the project
+      window.location.href = "/market_allcrypto";
+    });
+  }
+
+  var groupButton2 = document.getElementById("dashboard");
+  if (groupButton2) {
+    groupButton2.addEventListener("click", function (e) {
+      window.location.href = "/dashboard";
+    });
+  }
+</script>
+{% endblock body %}

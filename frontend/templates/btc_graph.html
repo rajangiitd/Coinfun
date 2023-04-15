@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% block title %}
+Currency-Graph
+{% endblock title %}
+
+{% block link %}
+rel="stylesheet" href="/static/css/btc_graph.css"
+{% endblock link %}
+
+{%block body %}
+
+<div class="btc-graph">
+ 
+  <div class="group-div">
+    <div class="group-child1"></div>
+    <div class="btcusdt">{{data['symbol']}}/USDT</div>
+  </div>
+  <div class="btc-graph-inner">
+    <div class="rectangle-parent1">
+      <div class="group-child2"></div>
+      <div class="hr-change-1567-container">
+        <p class="hr-change">24 hr Change</p>
+        <p class="hr-change">{{data['24h_change']}} $</p>
+      </div>
+    </div>
+  </div>
+  <div class="btc-graph-inner1">
+    <div class="rectangle-parent1">
+      <div class="group-child2"></div>
+      <div class="hr-change-1567-container">
+        <p class="hr-change">24 hr High</p>
+        <p class="hr-change">{{data['24h_high']}} $</p>
+      </div>
+    </div>
+  </div>
+  <div class="btc-graph-inner2">
+    <button class="rectangle-parent3">
+      <div class="group-child2"></div>
+      <div class="hr-low-container">
+        <p class="hr-change">24 hr Low</p>
+        <p class="hr-change">{{data['24h_low']}} $</p>
+      </div>
+    </button>
+  </div>
+  <div class="btc-graph-inner3">
+    <div class="rectangle-parent1">
+      <div class="group-child2"></div>
+      <div class="hr-change-1567-container">
+        <p class="hr-change">Current Price</p>
+        <p class="hr-change">{{data['last_price']}} $</p>
+      </div>
+    </div>
+  </div>
+  <b class="coinfun">Coinfun</b><img class="image-14-icon" alt="" src="/static/images/polygon.png" />
+  <div class="btc-graph-inner4">
+    <button class="rectangle-parent5">
+      <div class="group-child6"></div>
+      <div class="m-15-m">1 Min Changes</div>
+    </button>
+  </div>
+  <div class="btc-graph-inner5">
+    <button class="rectangle-parent6" id="groupButton5">
+      <div class="group-child7"></div>
+      <div class="buy-btc">Buy {{data['symbol']}}</div>
+    </button>
+  </div>
+  <div class="btc-graph-inner6">
+    <button class="rectangle-parent7" id="sell">
+      <div class="group-child8"></div>
+      <div class="sell-btc">Sell {{data['symbol']}}</div>
+    </button>
+  </div>
+  <div class="btc-graph-inner7">
+    <div class="rectangle-parent8">
+      <div class="group-child9"></div>
+      <div class="price-24407-container">
+        <span>Price</span><span class="usdt"> $ {{data['last_price']}} USDT</span>
+      </div>
+    </div>
+  </div>
+  <div class="btc-graph-inner8">
+    <div class="rectangle-parent8">
+      <div class="group-child9"></div>
+      <div class="price-24407-container">
+        <!-- <span>Quantity</span><span class="usdt"> 20.00</span> -->
+        <form>
+          <label for="amount">Enter Quantity</label>
+          <input type="number" id="amount" name="amount" required>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var groupButton = document.getElementById("market");
+  if (groupButton) {
+    groupButton.addEventListener("click", function (e) {
+      window.location.href = "/market_allcrypto";
+      // Please sync "All Cryptos" to the project
+    });
+  }
+
+  var groupButton1 = document.getElementById("dashboard");
+  if (groupButton1) {
+    groupButton1.addEventListener("click", function (e) {
+      window.location.href = "/dashboard";
+      // Please sync "P2P Buy" to the project
+    });
+  }
+
+  var groupContainer = document.getElementById("logout");
+  if (groupContainer) {
+    groupContainer.addEventListener("click", function (e) {
+      window.location.href = "/login";
+      // Please sync "login" to the project
+    });
+  }
+
+  var groupButton2 = document.getElementById("p2p_buy");
+  if (groupButton2) {
+    groupButton2.addEventListener("click", function (e) {
+      window.location.href = "/p2p_buy";
+    });
+  }
+
+  var groupButton5 = document.getElementById("groupButton5");
+  if (groupButton5) {
+    groupButton5.addEventListener("click", function (e) {
+
+      var amountInput = document.getElementById("amount");
+      var amountValue = amountInput.value;
+      if (amountValue == "") {
+          alert("Please enter a quantity.");
+          return;
+        }
+      window.location.href = "/change_wallet/{{data['symbol']}}/"+amountValue;
+
+      // Please sync "P2P Buy" to the project
+    });
+  }
+
+  var groupButton5 = document.getElementById("sell");
+  if (groupButton5) {
+    groupButton5.addEventListener("click", function (e) {
+
+      var amountInput = document.getElementById("amount");
+      var amountValue = amountInput.value;
+      if (amountValue == "") {
+          alert("Please enter a quantity.");
+          return;
+        }
+      window.location.href = "/change_wallet/{{data['symbol']}}/"+amountValue;
+
+      // Please sync "P2P Buy" to the project
+    });
+  }
+
+</script>
+
+{% endblock body %}

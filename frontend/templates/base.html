@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}
+
+        {% endblock title %}</title>
+    <link {% block link %}
+        
+    {% endblock link %} />
+    <link rel="stylesheet" href="/static/css/base.css" />
+    <link rel="stylesheet" href="/static/css/global.css" />
+    
+</head>
+
+<body>
+    <div class="all-cryptos">
+        <div class="all-cryptos-child"></div>
+        <button class="rectangle-parent" autofocus id="market">
+            <div class="group-child"></div>
+            <div class="market">Market</div>
+        </button>
+        <button class="rectangle-group" autofocus id="p2p_buy">
+            <div class="group-item"></div>
+            <div class="p2p">P2P</div>
+        </button>
+        <button class="rectangle-container" autofocus id="logout">
+            <div class="group-inner"></div>
+            <div class="logout">Logout</div>
+        </button>
+        <button class="group-button" autofocus id="dashboard">
+            <div class="rectangle-div"></div>
+            <div class="dashboard">Dashboard</div>
+        </button>
+    </div>
+
+    {% block body %}
+
+    {% endblock body %}
+
+</body>
+
+</html>

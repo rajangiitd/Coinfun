@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}
+user-profile
+{% endblock title %}
+
+{% block link %}
+rel="stylesheet" href="/static/css/user_profile.css"
+{% endblock link %}
+
+{%block body %}
+<h1 style="color: rgb(255, 0, 157); margin-left: 800px; font-size: 60px;">Coinfun</h1>
+
+<div class="user_profile">
+  <div class="user_profile1" style="margin-left: 100px;">
+    <p>Username: Vikash</p>
+    <p>Email: vikashmeena7781@gmail.com</p>
+    <p>Phone: 6378077747</p>
+    <p>Status: verified</p>
+  </div>
+  <div class="change_photo">
+    <img src="/static/images/dummy-profile2.png" alt="Profile_Pic"
+      style="margin-right: 100px; margin-top: 100px; height: 150px; width: 150px; border-radius: 20px; ">
+    <button type="submit" class="btn btn-success"
+      style="font-size: 30px; color: yellow; background-color: black; border-radius: 10px; margin-top: 20px; margin-right: 70px;">User</button>
+  </div>
+
+
+</div>
+
+<script>
+  var groupButton = document.getElementById("logout");
+  if (groupButton) {
+    groupButton.addEventListener("click", function (e) {
+      // Please sync "All Cryptos" to the project
+      window.location.href = "/";
+    });
+  }
+
+  var groupButton1 = document.getElementById("p2p_buy");
+  if (groupButton1) {
+    groupButton1.addEventListener("click", function (e) {
+      // Please sync "P2P Buy" to the project
+      window.location.href = "/p2p_buy";
+    });
+  }
+
+  var groupContainer = document.getElementById("market");
+  if (groupContainer) {
+    groupContainer.addEventListener("click", function (e) {
+      // Please sync "login" to the project
+      window.location.href = "/market_allcrypto";
+    });
+  }
+
+  var groupButton2 = document.getElementById("dashboard");
+  if (groupButton2) {
+    groupButton2.addEventListener("click", function (e) {
+      window.location.href = "/dashboard";
+    });
+  }
+</script>
+
+{% endblock body %}
