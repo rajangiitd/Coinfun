@@ -11,7 +11,3 @@ def convert_to_writable(filepath):
         return file             # use decode() to get a string for chats
     except:
         raise Exception("ConversionToBase64StringFailed!")
-
-def show_image(cursor):
-    # cursor here is cursor = db.cursor()
-    return None

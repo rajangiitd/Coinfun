@@ -1,5 +1,5 @@
 import mysql.connector
-import encryption_scheme
+from backend.utils.encryption_scheme import encrypt_password
 import os
 import random
 import json
@@ -100,7 +100,7 @@ def generate_fake_userinfo_p2pbidding_crptotradinghistory_data(num_users):
         contact = "9" + str(random.randint(100000000000, 999999999999))
         favourites = random.sample(CRYPTO_LIST, random.randint(0, len(CRYPTO_LIST)-2))
         favourites = ",".join(favourites)
-        password = encryption_scheme.encrypt_password(username+username)
+        password = encrypt_password(username+username)
         
         # Select profile picture for the user based on their username
         profile_pic_path = os.path.join("profile_pics",f"{username}.jpg")  # must be stable!

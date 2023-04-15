@@ -51,5 +51,5 @@ def fetch_market_page_data(symbols= symbols):
     except:
         raise Exception("Couldn't Fetch Market Page Data!" )
 
-fetch_all_currency_data()
-fetch_market_page_data()
+#fetch_all_currency_data()
+#fetch_market_page_data()
