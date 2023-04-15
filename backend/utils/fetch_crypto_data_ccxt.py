@@ -2,10 +2,17 @@ import ccxt
 from datetime import datetime, timedelta
 import pandas as pd
 import json, time
+import os
 
 symbols = ['BTC/USDT', 'ETH/USDT', 'BNB/USDT', 'DOGE/USDT', 'XRP/USDT', 'MATIC/USDT', 'ADA/USDT', 'SOL/USDT', 'SHIB/USDT', 'LTC/USDT']
 time_frames = ["1m" , "15m" , "1h" , "1d" ]
-exchange = getattr (ccxt, "bybit") ()    
+exchange = getattr (ccxt, "bybit") ()
+
+# Get the absolute path of the directory where this script is located
+script_directory = os.path.dirname(os.path.abspath(__file__))
+
+# Define the path to the data directory relative to the script directory
+data_directory = os.path.join(script_directory, 'data')
 
 def fetch_specific_currency_data(symbol, timeframe): # Input Example: symbol = "BTC/USDT" and timeframe = "1m"
     try:
@@ -14,8 +21,10 @@ def fetch_specific_currency_data(symbol, timeframe): # Input Example: symbol = "
         df = pd.DataFrame(data, columns=header).set_index('Timestamp')
         df.index = pd.to_datetime(df.index, unit='ms') + timedelta(hours=5, minutes=30) # convert timestamp to IST format
         symbol_out = symbol.replace("/", "")
-        filename = 'data/{}-{}-{}.json'.format(exchange, symbol_out,timeframe)
+        filename = '{}-{}-{}.json'.format(exchange, symbol_out,timeframe)
+        filename = os.path.join(data_directory, filename)
         df.reset_index().to_json(filename, orient='records', date_format='iso') # save as json file with date format
+        return None
     except:
         raise Exception("Couldn't Fetch Data for given symbol and timeframe!" )
 
@@ -25,6 +34,7 @@ def fetch_all_currency_data(symbols= symbols, time_frames=time_frames):
         for symbol in symbols:
             for timeframe in time_frames:
                 fetch_specific_currency_data(symbol, timeframe)
+        return None
     except:
         raise Exception("Failed to fetch data for all currencies!" )
     #end_time = time.time()  # end measuring time
@@ -45,9 +55,11 @@ def fetch_market_page_data(symbols= symbols):
                 '24h_turnover': ticker['quoteVolume'],
             }
             output_data.append(data)
-
-        with open('data/market_data.json', 'w') as f:
+        filename = 'market_data.json'
+        filename = os.path.join(data_directory, filename)
+        with open(filename, 'w') as f:
             json.dump(output_data, f, indent=2)
+        return None
     except:
         raise Exception("Couldn't Fetch Market Page Data!" )
 
