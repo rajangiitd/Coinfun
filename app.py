@@ -4,7 +4,7 @@ from flask import Flask , render_template , request , redirect , url_for , sessi
 import mysql.connector
 # import MySQLdb.cursors
 # import hashlib
-import encryption_scheme
+import backend.utils.encryption_scheme
 import dashboard
 import market
 import transaction
