@@ -2,9 +2,23 @@ import os
 import random
 import smtplib
 
+def is_valid_domain(email):
+    try:
+        ## Takes a string as input a checks whether the email has valid domain or not
+        valid_domains = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com' , 'iitd.ac.in']
+        domain = email.split('@')[-1]
+        if domain in valid_domains:
+            return True
+        else:
+            return False
+    except Exception as e:
+        raise Exception("Couldn't validate email domain")
+
 def send_otp(receiver_email):
     # Try to log in to server and send email
     try:
+        if(is_valid_domain(receiver_email)== False ):
+            raise("Invalid Email Domain")
         # Get the absolute path of the directory where this script is located
         script_directory = os.path.dirname(os.path.abspath(__file__))
         
@@ -40,6 +54,6 @@ def send_otp(receiver_email):
             server.quit()
         return otp  # Return the OTP to the caller
     except Exception as e:
-        raise("Couldn't Send OTP to email")
+        raise Exception("Couldn't Send OTP to given email")
 
 #send_otp("abcdefgh@gmail.com")
