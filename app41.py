@@ -1,4 +1,4 @@
-from flask import Flask , render_template , request , redirect , url_for , session
+from flask import Flask , render_template , request , redirect , url_for , session, send_file
 # from flask_sqlalchemy import SQLAlchemy
 # from flask_mysqldb import MySQL 
 import mysql.connector
@@ -8,28 +8,18 @@ import encryption_scheme
 import dashboard
 import market
 import transaction
+import order_and_wallet
+import userprofile
+import validate_fake_data
 # import mysql.connector
-# import pandas as pd
-# import matplotliblib.pyplot as plt
+import pandas as pd
+import matplotliblib.pyplot as plt
+import json
+from datetime import datetime, timedelta
 import re 
-# import secrets
-
-# secret_key = secrets.token_hex(16)
 
 app=Flask(__name__, static_folder='static')
-# app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///todo.db"
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# db = SQLAlchemy(app)
-# app.secret_key= str(secret_key)
 
-# app.config['MYSQL_HOST'] = 'localhost'
-# app.config['MYSQL_USER'] = 'root'
-# app.config['MYSQL_PASSWORD'] = 'Teamwork123'
-# app.config['MYSQL_DB'] = 'Coinfun_database'
-
-# sql=MySQL(app)
-
-# cursor = sql.connection.cursor(MySQLdb.cursors.DictCursor)
 db = mysql.connector.connect(
     host="localhost",
     user="root",
@@ -125,24 +115,25 @@ def transaction():
     (data,msg) = transaction_data(session['id'])
     return render_template('transaction.html',data=data,msg=msg)
 
-# @app.route('/otp-verification/<email>', methods=['GET', 'POST'])
-# def otp_verification(email):
-#     if request.method == 'POST' and 'otp' in request.form:
-#         entered_otp = request.form['otp']
-#         if entered_otp == session[email]:
-#             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-#             cursor.execute('UPDATE userinfo SET kyc = true WHERE email = % s', (email,))
-#             mysql.connection.commit()
-#             return redirect(url_for('dashboard', userid=email))
-#         else:
-#             return render_template('otp_verification.html', email=email, msg='Invalid OTP. Please try again.')
-#     elif request.method == 'POST':
-#         return render_template('otp_verification.html', email=email, msg='Please enter OTP.')
-#     else:
-#         otp = generate_otp()
-#         session[email] = otp
-#         send_otp(email, otp)
-#         return render_template('otp_verification.html', email=email)
+@app.route('/otp-verification', methods=['GET', 'POST'])
+def otp_verification():
+    if request.method == 'POST' and 'otp' in request.form:
+        entered_otp = request.form['otp']
+        if entered_otp == session['otp']:
+            # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute('UPDATE userinfo SET kyc = true WHERE email = % s', (email,))
+            mysql.connection.commit()
+            return redirect(url_for('dashboard'))
+        else:
+            return render_template('otp_verification.html', email=email, msg='Invalid OTP. Please try again.')
+    elif request.method == 'POST':
+        return render_template('otp_verification.html', email=email, msg='Please enter OTP.')
+    else:
+        msg = 'OTP sent successfully to your registered email ID'
+        session['otp'] = send_otp(session['id'])
+        if (type(session['otp']) != int):
+            msg = session['otp']
+        return render_template('otp_verification.html',msg=msg)
 
 @app.route('/market_allcrypto')
 def market():
@@ -216,36 +207,25 @@ def user_profile():
     data  = get_user_profile(session['id'])
     return render_template('user_profile.html', data=data)
     
-# @app.route('/change_pic')
-# def change_pic():
-    
-#     file = request.files['profile_pic'] # Get the uploaded file from the request
-#     filename = secure_filename(file.filename) # Sanitize the filename
-#     if filename:
-#         # Save the file to the server
-#         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-#             # Update the user's profile picture in the database
-#         cursor = mysql.connection.cursor()
-#         cursor.execute("UPDATE userinfo SET profile_pic = %s WHERE email_id = %s", (filename, userid))
-#         mysql.connection.commit()
-#             # Update the data dictionary with the new profile picture
-#         data['profile_pic'] = filename
-#     return redirect(url_for('user_profile'))
-    # elif request.method == 'POST':
-    #     username = request.form.get('username')
-    #     contact_number = request.form.get('phone_number')
-    #     if not username and not contact_number:
-    #         return redirect(url_for('user_profile', userid=userid))
-    #     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    #     if username:
-    #         cursor.execute('UPDATE userinfo SET username = %s WHERE email_id = %s', (username, userid))
-    #     if contact_number:
-    #         cursor.execute('UPDATE userinfo SET contact_number = %s WHERE email_id = %s', (contact_number, userid))
-    #     mysql.connection.commit()
-    #     return redirect(url_for('user_profile', userid=userid))
-
-
-
+@app.route('/change_pic',methods = ['GET','POST'])
+def change_pic():
+    if request.method == "POST":
+        msg = ''
+        try:
+            image_data = request.json.get('image_data')
+            image = io.BytesIO(base64.b64decode(image_data))
+            cursor.execute('INSERT INTO userinfo (profile_pic) values (%s) where email_id=%s',(image,session['id']))
+            db.commit()
+            msg = 'IMAGE UPDATED SUCCESSFULLY!'
+        except:
+            msg = 'IMAGE CANNOT BE UPDATED!'
+        return render_template('profile_pic.html',msg)
+    else:
+        cursor.execute('SELECT profile_pic from userinfo where email_id=%s',(session['id']))
+        image = cursor.fetchone()['profile_pic']
+        return render_template('profile_pic.html',image=image)
+        
+        
 @app.route('/order_history')
 def order_history():
     (history,msg) = get_order_history(session['username'])
@@ -265,17 +245,25 @@ def change_wallet(order_type, crypto, qty):
 def chat_buy(seller_mailID):
     if request.method == 'POST' and 'messageInput' in request.form:
         message = request.form["messageInput"]
-        data = {}
-        data["sender"] = message
-        # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT chat_messages FROM chat WHERE (email_id1 = %s AND email_id2 = %s) OR (email_id1 = %s AND email_id2 = %s)',(session['id'],seller_mailID,seller_mailID,session['id'],))
-        t = cursor.fetchone()
-        chat_str = t["chat_messages"]
-        if chat_str == "{}":
-            chat_str = "[" + json.dumps(data) + "]"
+        t = cursor.fetchone()['chat_messages']
+        l = json.loads(t)
+        
+        data = {}
+        data["sender"] = session['id']
+        data["message"] = message
+        if request.json.get('image_data'):
+            image_data = request.json.get('image_data')
+            image = io.BytesIO(base64.b64decode(image_data))
+            
+            data['image'] = json.loads("{'name':Null,'type':Null,'data':NULL}")
+            data['image']['data'] = image
         else:
-            chat_str = chat_str[0:-1] + "," + json.dumps(data) + "]"
-        cursor.execute("UPDATE chat SET chat_messages = %s WHERE (email_id1 = %s AND email_id2 = %s) OR (email_id1 = %s AND email_id2 = %s)", (chat_str, session['id'],seller_mailID,seller_mailID,session['id'],))
+            data['image'] = json.loads('NULL')
+        t.append(data)
+        messages = json.dumps(t)
+        cursor.execute("UPDATE chat SET chat_messages = %s WHERE (email_id1 = %s AND email_id2 = %s) OR (email_id1 = %s AND email_id2 = %s)", (t, session['id'],seller_mailID,seller_mailID,session['id'],))
+        # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         return redirect(url_for('chat_buy'))
     elif request.method == "POST":
         return None
@@ -283,33 +271,47 @@ def chat_buy(seller_mailID):
         msg = ''
         # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT chat_messages FROM chat WHERE (email_id1 = %s AND email_id2 = %s) OR (email_id1 = %s AND email_id2 = %s)',(session['id'],seller_mailID,seller_mailID,session['id'],))
-        t = cursor.fetchone()
-        chat = t['chat_messages']
-        chat = chat[1:-1]
-        chat = chat.split("},")
-        data = {}
-        data[session['id']] = []
-        data[seller_mailID] = []
-        chat = []
-        for item in chat:
-            if item[0] == "{":
-                item = item[1:len(item)]
-            if item[-1] == "}":
-                item = item[0:-1]
-            item = item.split(",")
-            dict = {}  
-            element = item[0].split(":")
-            message = item[1].split(":")
-            message = message[1][1:-1]
-            sender = element[1][1:-1]
-            if sender == seller_mailID:
-                data[seller_mailID].append(message)
-            elif sender == session['id']:
-                data[session['id']].append(message)
+        t = cursor.fetchone()['chat_messages']
+        data = json.loads(t)
         if len(data[seller_mailID]) == 0 and len(data[session['id']]) == 0:
             msg = 'No messages'
         return render_template('chat_buy.html',data=data,msg=msg)
+
+@app.route('/chat/<string:buyer_mailID>',methods = ['GET','POST'])
+def chat_buy(buyer_mailID):
+    if request.method == 'POST' and 'messageInput' in request.form:
+        message = request.form["messageInput"]
+        cursor.execute('SELECT chat_messages FROM chat WHERE (email_id1 = %s AND email_id2 = %s) OR (email_id1 = %s AND email_id2 = %s)',(session['id'],buyer_mailID,buyer_mailID,session['id'],))
+        t = cursor.fetchone()['chat_messages']
+        l = json.loads(t)
         
+        data = {}
+        data["sender"] = session['id']
+        data["message"] = message
+        if request.json.get('image_data'):
+            image_data = request.json.get('image_data')
+            image = io.BytesIO(base64.b64decode(image_data))
+            
+            data['image'] = json.loads("{'name':Null,'type':Null,'data':NULL}")
+            data['image']['data'] = image
+        else:
+            data['image'] = json.loads('NULL')
+        t.append(data)
+        messages = json.dumps(t)
+        cursor.execute("UPDATE chat SET chat_messages = %s WHERE (email_id1 = %s AND email_id2 = %s) OR (email_id1 = %s AND email_id2 = %s)", (t, session['id'],buyer_mailID,buyer_mailID,session['id'],))
+        # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        return redirect(url_for('sell'))
+    elif request.method == "POST":
+        return None
+    else:
+        msg = ''
+        # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('SELECT chat_messages FROM chat WHERE (email_id1 = %s AND email_id2 = %s) OR (email_id1 = %s AND email_id2 = %s)',(session['id'],buyer_mailID,buyer_mailID,session['id'],))
+        t = cursor.fetchone()['chat_messages']
+        data = json.loads(t)
+        if len(data[buyer_mailID]) == 0 and len(data[session['id']]) == 0:
+            msg = 'No messages'
+        return render_template('chat_sell.html',data=data,msg=msg)
  
     
 # @app.route('/dropdown')
