@@ -40,8 +40,8 @@ def transaction_data(email):
             data['price'].append(l['price'])
             data['time_stamp'].append(l['time_stamp'])
         elif (l['seller_email_id'] == session['id']):
-            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-                # cursor.execute('SELECT username from userinfo where email_id=%s',(l['buyer_email_id'],))
+            # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute('SELECT username from userinfo where email_id=%s',(l['buyer_email_id'],))
             t = cursor.fetchone()
             data['client'].append({t['username'],l['buyer_email_id']})
             data['order_type'].append('sell')
