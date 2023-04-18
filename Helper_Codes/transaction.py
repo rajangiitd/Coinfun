@@ -11,6 +11,7 @@ db = mysql.connector.connect(
 )
 cursor = db.cursor()
 
+### Getting the P2P trade history data
 
 def transaction_data(email):
     data = {}

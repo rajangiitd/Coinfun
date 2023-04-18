@@ -13,8 +13,11 @@ db = mysql.connector.connect(
 )
 cursor = db.cursor()
 
+#### email_id1< email_id2 
 
 def update_chat_txt(emailID1,emailID2,message):
+	if emailid1>emaild2:
+		emaild1,email2 = 2,1
     cursor.execute('SELECT chat_messages FROM chat WHERE (email_id1 = %s AND email_id2 = %s) OR (email_id1 = %s AND email_id2 = %s)',(emailID1,emailID2,emailID2,emailID1,))
     t = cursor.fetchone()['chat_messages']
     l = json.loads(t)
@@ -27,6 +30,7 @@ def update_chat_txt(emailID1,emailID2,message):
     cursor.execute("UPDATE chat SET chat_messages = %s WHERE (email_id1 = %s AND email_id2 = %s) OR (email_id1 = %s AND email_id2 = %s)", (t, emailID1,emailID2,emailID2,emailID1,))
     # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     return None
+
 def update_chat_image(emailID1,emailID2,photo):
     cursor.execute('SELECT chat_messages FROM chat WHERE (email_id1 = %s AND email_id2 = %s) OR (email_id1 = %s AND email_id2 = %s)',(emailID1,emailID2,emailID2,emailID1,))
     t = cursor.fetchone()['chat_messages']

@@ -12,6 +12,8 @@ db = mysql.connector.connect(
 )
 cursor = db.cursor()
 
+### CRYPTO BUY OR SELL, USDT_AMOUNT IS INPUT , NOT CRYPTO AMOUNT, USE MARKET_JSON FOR CURRENT PRICE
+
 def execute_crypto_trade(email, order_type, crypto, qty):
     # qty refers to quantity of crypto (not USDT)
     script_directory = os.path.dirname(os.path.abspath(__file__))
@@ -40,6 +42,8 @@ def execute_crypto_trade(email, order_type, crypto, qty):
         wallet = json.dumps(wallet)
         cursor.execute('UPDATE userinfo SET wallet=%s where email_id=%s', (wallet, email,))
     
+### SIMPLE QUERY TO GET THE TRADES OF CRYPTO DONE BY USER
+
 def get_order_history(name):
     try:
         history = []

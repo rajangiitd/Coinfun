@@ -16,7 +16,7 @@ cursor = db.cursor()
 def get_market_data():
     json_data = []
 # Load market data from JSON file
-    file_path = ''
+    file_path = ''					# USE OS
     file_path = file_path + '/market.json'
     with open(file_path) as f: # here I need to enter the path of the file
         market_data = json.load(f)
@@ -62,8 +62,6 @@ def p2p_sell_data_get():
         dic['username'] = t['username']
         list.append(dic)
     return list
-
-
     
     
 def fetch_fav(email):
@@ -84,7 +82,7 @@ def fetch_fav(email):
     return fav_details
 
 
-def form_graph(crypto):
+def form_graph(crypto): 		## returns a coded image in base 64
     file_path_1 = ''
     file_path_1 = file_path_1 + "/" + "Bybit-" + crypto + "USDT-1m.jason"
     
