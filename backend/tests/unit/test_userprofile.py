@@ -28,10 +28,15 @@ def test_change_pass_help_WhenNewPassIsNotValid():
     with pytest.raises(Exception, match="Please enter a valid password, it should contain atleast 1 capital and 1 small alphabets and atleast 1 digit with length between 8-25"):
         change_pass_help("coinfunnoreply@gmail.com","Testaccount1Testaccount1","Test1","Test1")
 
-def test_change_pass_help_WhenCurrentPassIsNotValid():
+def test_change_pass_help_WhenCurrentPassIsNotValid1():
     # Test if a valid email is accepted
     with pytest.raises(Exception, match="The current entered password does not matches the exisiting password"):
         change_pass_help("coinfunnoreply@gmail.com","Old","Testaccount1Testaccount1","Testaccount1Testaccount1")
+        
+def test_change_pass_help_WhenCurrentPassIsNotValid2():
+    # Test if a valid email is accepted
+    with pytest.raises(Exception, match="The current entered password does not matches the exisiting password"):
+        change_pass_help("coinfunnoreply@gmail.com","OldPassword1","Testaccount1Testaccount1","Testaccount1Testaccount1")
 
 def test_change_pass_help_WhenInputIsValid():
     assert change_pass_help("coinfunnoreply@gmail.com","Testaccount1Testaccount1","Testaccount1Testaccount1","Testaccount1Testaccount1")=='PASSWORD UPDATED SUCCESSFULLY'  
