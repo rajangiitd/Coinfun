@@ -25,7 +25,7 @@ def test_change_pass_help_WhenNewPassIsNotEqualNewPassConfirm():
 
 def test_change_pass_help_WhenNewPassIsNotValid():
     # Test if a valid email is accepted
-    with pytest.raises(Exception, match="Please enter a valid password (should contain atleast 1 capital and 1 small alphabets and atleast 1 digit with length between 8-25)"):
+    with pytest.raises(Exception, match="Please enter a valid password, it should contain atleast 1 capital and 1 small alphabets and atleast 1 digit with length between 8-25"):
         change_pass_help("coinfunnoreply@gmail.com","Testaccount1Testaccount1","Test1","Test1")
 
 def test_change_pass_help_WhenCurrentPassIsNotValid():

@@ -31,7 +31,7 @@ def change_pass_help(email, current_pass, new_pass, new_pass_confirm):
         if(new_pass!=new_pass_confirm):
             raise Exception("The new password does not matches the confirm new password !")
         if(is_password_valid(new_pass)==False):
-            raise Exception("Please enter a valid password (should contain atleast 1 capital and 1 small alphabets and atleast 1 digit with length between 8-25)")
+            raise Exception("Please enter a valid password, it should contain atleast 1 capital and 1 small alphabets and atleast 1 digit with length between 8-25")
         
         try:
             password_encrypt_for_validation = encrypt_password(current_pass)
