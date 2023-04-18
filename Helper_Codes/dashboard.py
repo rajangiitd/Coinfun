@@ -9,11 +9,12 @@ db = mysql.connector.connect(
     password="Teamwork123",
     database="Coinfun_database"
 )
-cursor = db.cursor()
 
+cursor = db.cursor()
 
 def get_wallet_data(email):
     # data = {}
+    
     cursor.execute('SELECT wallet  FROM userinfo where email=%s',(email,))
     t = cursor.fetchone()
     wallet = t['wallet']
@@ -43,3 +44,5 @@ def get_wallet_data(email):
         t.append(temp)  
         # data['wallet'].append(temp) # Append temp directly without curly braces
     return t
+
+print(get_wallet_data("person1@gmail.com"))

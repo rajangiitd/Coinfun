@@ -4,7 +4,7 @@ import pandas as pd
 import json, time
 import os
 
-symbols = ['BTC/USDT', 'ETH/USDT', 'BNB/USDT', 'DOGE/USDT', 'XRP/USDT', 'MATIC/USDT', 'ADA/USDT', 'SOL/USDT', 'SHIB/USDT', 'LTC/USDT']
+symbols = ['BTC/USDT', 'ETH/USDT', 'BNB/USDT', 'DOGE/USDT', 'XRP/USDT', 'MATIC/USDT', 'ADA/USDT', 'SOL/USDT']
 time_frames = ["1m" , "15m" , "1h" , "1d" ]
 exchange = getattr (ccxt, "bybit") ()
 
