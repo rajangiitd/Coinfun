@@ -1,7 +1,5 @@
 import json
 import mysql.connector
-import backend.utils.image 
-import base64
 
 db = mysql.connector.connect(
     host="localhost",
