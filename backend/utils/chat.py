@@ -1,68 +1,76 @@
-from flask import Flask , render_template , request , redirect , url_for , session
 import json
-# from flask_sqlalchemy import SQLAlchemy
-# from flask_mysqldb import MySQL
 import mysql.connector
-import image 
+import backend.utils.image 
 import base64
+
 db = mysql.connector.connect(
     host="localhost",
     user="root",
     password="Teamwork123",
     database="Coinfun_database"
 )
+
 cursor = db.cursor()
 
-
-def update_chat_txt(email_sender,emailID1,emailID2,message):
+def update_chat_txt(sender_email, emailID1, emailID2, message):
     try:
-        cursor.execute('SELECT chat_messages FROM chat WHERE (email_id1 = %s AND email_id2 = %s) OR (email_id1 = %s AND email_id2 = %s)',(emailID1,emailID2,emailID2,emailID1,))
+        if (emailID1 > emailID2):
+            emailID1,emailID2 = emailID2,emailID1
+        if(emailID1==emailID2):
+            raise "You cannot send message to yourself!"
+        cursor.execute('SELECT chat_messages FROM chat WHERE email_id1 = %s AND email_id2 = %s', (emailID1, emailID2,))
         t = cursor.fetchone()
         if (t == None):
-            if (emailID1 > emailID2):
-                emailID1,emailID2 = emailID2,emailID1
             chat = json.dumps([])
-            cursor.execute('INSERT INTO chat VALUES (%s,%s,%s)',(emailID1,emailID2,chat,))
-            update_chat_txt(email_sender,emailID1,emailID2,message)
-        l = json.loads(t[0])
+            cursor.execute('INSERT INTO chat (email_id1, email_id2, chat_messages) VALUES (%s, %s, %s)', (emailID1, emailID2, chat,))
+            db.commit()
+            update_chat_txt(sender_email,emailID1,emailID2,message)
+        t = json.loads(t[0])
         data = {}
-        data["sender"] = email_sender
+        data["sender"] = sender_email
         data["message"] = message
-        data['image'] = json.loads("{'name':Null,'type':Null,'data':NULL}")
+        data['image'] = {}
+        data['image']['name'] = None
+        data['image']['type'] = None
+        data['image']['data'] = None
+        # data['image'] = json.loads("{'name':Null,'type':Null,'data':NULL}")
         t.append(data)
-        messages = json.dumps(t)
-        cursor.execute("UPDATE chat SET chat_messages = %s WHERE (email_id1 = %s AND email_id2 = %s) OR (email_id1 = %s AND email_id2 = %s)", (t, emailID1,emailID2,emailID2,emailID1,))
-        # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        return None
+        t = json.dumps(t)
+        cursor.execute("UPDATE chat SET chat_messages = %s WHERE email_id1 = %s AND email_id2 = %s", (t, emailID1,emailID2))
+        db.commit()
+        return "Chat messages updated successfully!"
     except:
-        raise Exception('Chat messages cannot be updated !')
-def update_chat_image(email_sender,emailID1,emailID2,photo):
+        raise Exception("Chat Messages Coudn't be updated!")
+
+
+def update_chat_image(sender_email,emailID1,emailID2,photo):
     try:
-        cursor.execute('SELECT chat_messages FROM chat WHERE (email_id1 = %s AND email_id2 = %s) OR (email_id1 = %s AND email_id2 = %s)',(emailID1,emailID2,emailID2,emailID1,))
-        t = cursor.fetchone()[0]
+        if (emailID1 > emailID2):
+            emailID1,emailID2 = emailID2,emailID1
+        if(emailID1==emailID2):
+            raise "You cannot send message to yourself!"
+        cursor.execute('SELECT chat_messages FROM chat WHERE email_id1 = %s AND email_id2 = %s', (emailID1, emailID2,))
+        t = cursor.fetchone()
         if (t == None):
-            if (emailID1 > emailID2):
-                emailID1,emailID2 = emailID2,emailID1
             chat = json.dumps([])
-            cursor.execute('INSERT INTO chat VALUES (%s,%s,%s)',(emailID1,emailID2,chat,))
-            update_chat_txt(email_sender,emailID1,emailID2,photo)
-        l = json.loads(t[0])
+            cursor.execute('INSERT INTO chat (email_id1, email_id2, chat_messages) VALUES (%s, %s, %s)', (emailID1, emailID2, chat,))
+            db.commit()
+            update_chat_txt(sender_email,emailID1,emailID2,photo)
+        t = json.loads(t[0])
+        
         data = {}
-        data["sender"] = email_sender
+        data["sender"] = sender_email
         data["message"] = ''
-        data['image'] = json.loads("{'name':Null,'type':Null,'data':NULL}")
-            
-        if photo.filename != '':
-                    # Check if the file has an allowed image extension
-            if image.allowed_file(photo.filename):
-                            # Read the binary data from the file
-                data = photo.read()
-                    # Encode the binary data as base64
-                encoded_data = base64.b64encode(data)
-                data['image']['data'] = encoded_data
-        l.append(data)
-        messages = json.dumps(l)
-        cursor.execute("UPDATE chat SET chat_messages = %s WHERE (email_id1 = %s AND email_id2 = %s) OR (email_id1 = %s AND email_id2 = %s)", (t, emailID1,emailID2,emailID2,emailID1,))
-        return None
+        # data['image'] = json.loads("{'name':Null,'type':Null,'data':NULL}")
+        data['image'] = {}
+        data['image']['name'] = None
+        data['image']['type'] = None
+        data['image']['data'] = photo # Encoded base64 string
+        t.append(data)
+        
+        t = json.dumps(t)
+        cursor.execute("UPDATE chat SET chat_messages = %s WHERE email_id1 = %s AND email_id2 = %s", (t, emailID1,emailID2))
+        db.commit()
+        return "Chat messages updated successfully!"
     except:
-        raise Exception('chat messages cannot be updated !')
+        raise Exception("Chat Messages Coudn't be updated!")
