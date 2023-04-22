@@ -5,6 +5,7 @@ import os
 import json
 import base64
 from backend.utils.image import convert_to_writable
+from backend.utils.userprofile import get_user_profile
 import io
 
 db = mysql.connector.connect(
@@ -15,9 +16,8 @@ db = mysql.connector.connect(
 )
 cursor = db.cursor()
 
-def get_market_data(filename='market_data.json'):
+def get_market_data(email_id= None, filename='market_data.json'):
     try:
-        json_data = []
         # Load market data from JSON file
         script_directory = os.path.dirname(os.path.abspath(__file__))
         # Define the path to the data directory relative to the script directory
@@ -26,10 +26,19 @@ def get_market_data(filename='market_data.json'):
         with open(file_path) as f:  
             market_data = json.load(f) # Access contents of the dictionary
 
-        for item in market_data:
-            item['symbol'] = (item['symbol'].split("/"))[0]
-            json_data.append(item)
-        return json_data
+        if(email_id == None):
+            for item in market_data:
+                item['symbol'] = (item['symbol'].split("/"))[0]
+            return market_data
+        else:
+            fav_crypto = get_fav_crypto_list(email_id)
+            for item in market_data:
+                item['symbol'] = (item['symbol'].split("/"))[0]
+                if (item['symbol'] in fav_crypto):
+                    item['fav_crypto'] = True
+                else:
+                    item['fav_crypto'] = False
+            return market_data
     except:
         raise Exception('Market data could not be fetched!')
 
@@ -50,7 +59,8 @@ def get_fav_page_data(email_id):
         market_data = get_market_data()
         fav_page_data = []
         for item in market_data:
-            if(item['symbol'] in favourite_crypto_list):
+            crypto = item['symbol'].split('/')[0]
+            if(crypto in favourite_crypto_list):
                 fav_page_data.append(item)
         return fav_page_data
     except Exception as e:
@@ -61,7 +71,10 @@ def get_p2p_buy_page_data():
         cursor.execute('SELECT * FROM P2PBiddingData where buy_type = false')
         rows = cursor.fetchall()
         keys = ('email_id', 'buy_type', 'transaction_usdt', 'price', 'payment_method', 'lower_limit', 'upper_limit')
-        return list([dict(zip(keys, row)) for row in rows])
+        data_ = list([dict(zip(keys, row)) for row in rows])
+        for dict_ in data_:
+            dict_['username'] = get_user_profile(dict_["email_id"])['username']
+        return data_
     except: 
         raise Exception('Sorry! Bidding details for Buying page could not be fetched !')
 
@@ -70,7 +83,10 @@ def get_p2p_sell_page_data():
         cursor.execute('SELECT * FROM P2PBiddingData where buy_type = True')
         rows = cursor.fetchall()
         keys = ('email_id', 'buy_type', 'transaction_usdt', 'price', 'payment_method', 'lower_limit', 'upper_limit')
-        return list([dict(zip(keys, row)) for row in rows])
+        data_ = list([dict(zip(keys, row)) for row in rows])
+        for dict_ in data_:
+            dict_['username'] = get_user_profile(dict_["email_id"])['username']
+        return data_
     except:
         raise Exception('Sorry! Bidding details for Selling page could not be fetched!')
 

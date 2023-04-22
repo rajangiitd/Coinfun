@@ -1,7 +1,8 @@
 import mysql.connector
 import json
-import os
 from collections import defaultdict
+from backend.utils.userprofile import get_user_profile
+from backend.utils.marketandp2p import get_market_data
 
 db = mysql.connector.connect(
     host="localhost",
@@ -12,36 +13,37 @@ db = mysql.connector.connect(
 
 cursor = db.cursor()
 
-def get_wallet_data(email):
+def get_wallet_data(email_id):
     try:
-        cursor.execute('SELECT wallet FROM userinfo where email_id=%s',(email,))
+        cursor.execute('SELECT wallet FROM userinfo where email_id=%s',(email_id,))
         wallet = cursor.fetchone()[0]
         wallet = json.loads(wallet) # Typecast string to dictionary
         wallet = defaultdict(float, wallet)
         
-        # Get the absolute path of the directory where this script is located
-        script_directory = os.path.dirname(os.path.abspath(__file__))
-        # Define the path to the data directory relative to the script directory
-        data_directory = os.path.join(script_directory, 'data')
-        file_path = data_directory + '/market_data.json'
+        market_data = get_market_data()
         
-        with open(file_path) as f:  
-            market_data = json.load(f) # Access contents of the dictionary
-        
+        dict_ = {}
+        dict_['username'] = get_user_profile(email_id)['username']
+
         list_ = []  # List of dictornaries
         # Each dictionary have symbol, amount, price, est_balance
-        
+        total_balance = wallet['USDT'] + wallet['USDT_in_bid']
+
         for item in market_data:
             temp = {}
-
             crypto = item['symbol'].split("/")[0]
             item['symbol'] = crypto
             temp['symbol'] = crypto
             temp['amount'] = wallet[crypto]
             temp['price'] = item['last_price']
-            temp['est_balance'] = temp['price']*temp['amount']      
+            temp['est_balance'] = temp['price']*temp['amount']     
+            total_balance += temp['est_balance']
             list_.append(temp)  
             # data['wallet'].append(temp) # Append temp directly without curly braces
-        return list_
+        dict_['data'] = list_ 
+        dict_['estimated_balance'] = total_balance
+        return dict_
     except:
         raise Exception("Couldn't fetch wallet data")
+
+print(get_wallet_data("person1@gmail.com"))

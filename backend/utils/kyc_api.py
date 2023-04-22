@@ -1,6 +1,38 @@
 from backend.utils.image import convert_to_writable
 from google.cloud import vision
 import os
+import mysql.connector
+
+db = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="Teamwork123",
+    database="Coinfun_database"
+)
+cursor = db.cursor()
+
+def get_kyc_status(email_id):
+    try:
+        cursor.execute('SELECT kyc FROM userinfo WHERE email_id = %s', (email_id,))
+        kyc = cursor.fetchone()[0]
+        return kyc
+    except:
+        raise Exception("Couldn't fetch KYC status")
+
+def approve_kyc_status(email_id):
+    try:
+        # Check if email_id exists in the userinfo table
+        cursor.execute('SELECT email_id FROM userinfo WHERE email_id=%s', (email_id,))
+        result = cursor.fetchone()
+        if result is None:
+            raise Exception("Email ID not found in userinfo table")
+        
+        cursor.execute('UPDATE userinfo SET kyc = %s WHERE email_id = %s', (True, email_id))
+        db.commit()
+        return True    # for successful approval of KYC
+    except Exception as e:
+        db.rollback()
+        raise e
 
 # Command to run in terminal if API doesn't work
 # export  GOOGLE_APPLICATION_CREDENTIALS="/home/rajan/Desktop/COP290/Coinfun/backend/utils/strong-matrix-384420-f3e753c24872.json"
