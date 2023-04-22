@@ -46,4 +46,4 @@ def get_wallet_data(email_id):
     except:
         raise Exception("Couldn't fetch wallet data")
 
-print(get_wallet_data("person1@gmail.com"))
+#print(get_wallet_data("person1@gmail.com"))

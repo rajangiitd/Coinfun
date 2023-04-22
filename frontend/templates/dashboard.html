@@ -11,7 +11,7 @@ rel="stylesheet" href="/frontend/static/css/dashboard.css"
 
 <div class="dropdown">
   <button type="button" class="btn btn-success" style="font-size: large; background-color: aqua;" onclick="location.href='{{url_for('user_profile')}}'">Check Profile</button>
-  <button type="button" class="btn btn-success" style="font-size: large; background-color: aqua;" onclick="location.href='{{url_for('changepassword')}}'">Change Password</button><br><br>
+  <button type="button" class="btn btn-success" style="font-size: large; background-color: aqua;" onclick="location.href='{{url_for('change_password')}}'">Change Password</button><br><br>
   <button type="button" class="btn btn-success" style="font-size: large; background-color: aqua;" onclick="location.href='{{url_for('order_history')}}'">Check Your Order History</button><br><br>
   <button type="button" class="btn btn-success" style="font-size: large; background-color: aqua;" onclick="location.href='{{url_for('transaction')}}'">Check Your Transaction History</button>
 </div>
@@ -49,7 +49,7 @@ rel="stylesheet" href="/frontend/static/css/dashboard.css"
             {% for rows in data['data'] %}
               <tr>
                 <td>
-                  {{rows['name']}}
+                  {{rows['symbol']}}
                 </td>
                 <td>{{rows['amount']}}</td>
                 <td>{{rows['price']}} $</td>

@@ -137,3 +137,5 @@ def form_graph(crypto, time_frame, horizontal_size=16, vertical_size=8):
         return ( base64_image, crypto_details) # image is a base64 string, crypto_details is a dictionary
     except Exception as e:
         raise e
+    
+# print(get_market_data("person1@gmail.com"))

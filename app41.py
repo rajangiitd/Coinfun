@@ -24,7 +24,12 @@ import re
 import os
 import base64
 
-app=Flask(__name__, static_folder='static')
+# app=Flask(__name__, static_folder='/frontend/static',template_folder='/frontend/templates')
+
+app = Flask(__name__, static_folder=os.path.join(os.getcwd(), 'frontend', 'static'), template_folder=os.path.join(os.getcwd(), 'frontend', 'templates'))
+
+app.secret_key = 'Teamwork123'
+
 
 db = mysql.connector.connect(
     host="localhost",
@@ -38,16 +43,16 @@ cursor = db.cursor()
 def first():
 	return render_template('login.html', msg = '')
 
-@app.route('/login', methods =['GET'])
+@app.route('/login', methods =['POST'])
 def login():
 	message = ''
-	if request.method == 'GET' and 'email' in request.form and 'password' in request.form:
+	if request.method == 'POST' and 'email' in request.form and 'password' in request.form:
 		email = request.form['email']
 		password = request.form['password']
 		
-		cursor.execute('SELECT * FROM userinfo WHERE email_id = % s AND password = % s', (email,encrypt_password(password), ))
+		cursor.execute('SELECT * FROM userinfo WHERE email_id = %s AND password = %s', (email,encrypt_password(password),))
 		account = cursor.fetchone()
-		if account:
+		if account != None:
 			session['loggedin'] = True
 			session['id'] = account[0]
 			session['username'] = account[1]
@@ -57,7 +62,8 @@ def login():
 			message = 'Incorrect username / password !'
 	return render_template('login.html', msg = message)
 
-@app.route('/register', methods=['POST'])
+
+@app.route('/register', methods=['POST','GET'])
 def register():
     msg = ''
     if request.method == 'POST' and 'username' in request.form and 'email' in request.form and 'password' in request.form and 'confirm-password' in request.form and 'phone-number' in request.form:
@@ -118,7 +124,7 @@ def dashboard():
     msg = ''
     data = []
     try:
-        data= dashboard.get_wallet_data(session['id'])
+        data= get_wallet_data(session['id'])
         temp = {}
         temp['username'] = session['username']
         data.append(temp)
@@ -131,7 +137,7 @@ def transaction():
     data = []
     msg = ''
     try:
-        data = transaction.get_transaction_history_data(session['id'])
+        data = get_transaction_history_data(session['id'])
     except Exception as e:
         msg = str(e)
     return render_template('transaction.html',data=data,msg=msg)
@@ -161,21 +167,33 @@ def otp_verification():
 @app.route('/market_allcrypto')
 def market():
     json_data = []
-    data = []
+    # data = []
     msg = ''
     try:
-        json_data=get_market_data()
+        json_data=get_market_data(session['id'])
         # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        data = get_fav_crypto_list(session['id'])
+        # data = get_fav_crypto_list(session['id'])
     except Exception as e:
         msg = str(e)
-    return render_template('market_allcrypto.html',jsondata=json_data,data=data,msg=msg)
+    return render_template('market_allcrypto.html',jsondata=json_data,msg=msg)
     
 @app.route('/mark_fav/<string:fav>')
 def mark_fav(fav):
     fav = "," + fav
+    
     cursor.execute("UPDATE userinfo SET favourites = CONCAT(favourites, %s) WHERE email_id =%s",(fav,session['id'],))
-    return redirect(url_for('market_allcrypto'))
+    db.commit()
+    return redirect(url_for('market'))
+
+@app.route('/mark_unfav/<string:fav>')
+def mark_unfav(fav):
+    cursor.execute('Select favourites from userinfo where email_id = %s',(session['id'],))
+    favourites = (cursor.fetchone()[0]).split(',')
+    favourites.remove(fav)
+    favourites = ",".join(favourites)
+    cursor.execute("UPDATE userinfo SET favourites = %s WHERE email_id =%s",(favourites,session['id'],))
+    db.commit()
+    return redirect(url_for('market'))
 
 @app.route('/p2p_buy')
 def p2p():
@@ -210,7 +228,7 @@ def p2p_sell():
         list = get_p2p_sell_page_data()
     except Exception as e:
         msg = str(e)
-    return render_template('p2p_sell.html',list=list,msg=msg)
+    return render_template('p2p_sell.html',data=list,msg=msg)
 
 @app.route('/p2p_deduct_usdt/<float:balance>')  
 def p2p_deduct_usdt(balance):
@@ -222,13 +240,13 @@ def p2p_deduct_usdt(balance):
     cursor.execute("UPDATE userinfo SET wallet = %s WHERE email_id= %s",(wallet,session['id'],))
     return redirect(url_for('p2p_sell'))
     
-@app.route('/change_password',methods = ['POST'])
+@app.route('/change_password',methods = ['POST','GET'])
 def change_password():
-    # msg = ''
-    if request.method == 'POST' and 'current_password' in request.form and 'newpassword' in request.form and 'newpassword_confirmed' in request.form:
-        current_pass = request.form['current_password']
-        newpass = request.form['newpassword']
-        newpass_confirm = request.form['newpassword_confirmed']
+    msg = ''
+    if request.method == 'POST' and 'password' in request.form and 'new_password' in request.form and 'confirm_new_password' in request.form:
+        current_pass = request.form['password']
+        newpass = request.form['new_password']
+        newpass_confirm = request.form['confirm_new_password']
         # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         try:
             msg =  change_pass_help(session['id'],current_pass,newpass,newpass_confirm)
@@ -236,7 +254,7 @@ def change_password():
             msg = str(e)
     elif request.method == 'POST':
         msg = 'Please fill in all the blanks provided'
-    return render_template('changepassword.html',msg)
+    return render_template('changepassword.html',msg=msg)
     
 @app.route('/market_fav')
 def market_fav():
@@ -294,10 +312,10 @@ def order_history():
     history = []
     msg = ''
     try:
-        history = market.get_order_history(session['username'])
+        history = get_order_history(session['username'])
     except Exception as e:
         msg = str(e)
-    return render_template('order_history.html',history=history,message=msg)
+    return render_template('order_history.html',history=history,msg=msg)
     
 @app.route('/exchange_btc/<string:crypto>/<string:time_frame>')
 def exchange_btc_1m(crypto,time_frame):
