@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="initial-scale=1, width=device-width" />
-    <link rel="stylesheet" href="/static/css/global.css" />
-    <link rel="stylesheet" href="/static/css/market_allcrypto.css" />
+    <link rel="stylesheet" href="/Coinfun/frontend/static/css/global.css" />
+    <link rel="stylesheet" href="/Coinfun/frontend/static/css/market_allcrypto.css" />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;900&display=swap"
@@ -17,7 +17,6 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&display=swap"
     />
-    <title>market_allcrypto</title>
   </head>
   <body>
     <div class="all-cryptos">
@@ -38,113 +37,48 @@
         <div class="rectangle-div"></div>
         <div class="dashboard">Dashboard</div>
       </button>
-
+      {% if jsondata|length > 0 %}
       <table>
         <thead>
           <tr>
             <th>Name</th>
             <th>Price</th>
             <th>24h Change</th>
+            <th>24h Low</th>
+            <th>24h High</th>
             <th>24h Turnover</th>
             <th>Favourites</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td><a href="/mark_fav/BTC" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Bitcoin</button></td>
-            <td>{{jsondata[0]['last_price']}}</td>
-            <td>{{jsondata[0]['24h_change']}}</td>
-            <td>{{jsondata[0]['24h_turnover']}}</td>
-            
-              <td>
-                <a href="/mark_fav/BTC" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Mark Favourite</button>
-              </td>
-           
-          </tr>
-            <td><a href="/mark_fav/ETH" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Etherum</button></td>
-            <td>{{jsondata[1]['last_price']}}</td>
-            <td>{{jsondata[1]['24h_change']}}</td>
-            <td>{{jsondata[1]['24h_turnover']}}</td>
-           
-              <td>
-                <a href="/mark_fav/BTC" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Mark Favourite</button>
-              </td>
-           
-          </tr>
-          <tr>
-            <td><a href="/mark_fav/BNB" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Bitcoin</button></td>
-            <td>{{jsondata[2]['last_price']}}</td>
-            <td>{{jsondata[2]['24h_change']}}</td>
-            <td>{{jsondata[2]['24h_turnover']}}</td>
-            
-              <td>
-                <a href="/mark_fav/BNB" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Mark Favourite</button>
-              </td>
-            
-          </tr>
-          <tr>
-            <td><a href="/mark_fav/DOGE" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Dogecoin</button></td>
-            <td>{{jsondata[3]['last_price']}}</td>
-            <td>{{jsondata[3]['24h_change']}}</td>
-            <td>{{jsondata[3]['24h_turnover']}}</td>
-            
-              <td>
-                <a href="/mark_fav/DOGE" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Mark Favourite</button>
-              </td>
-            
-          </tr>
-          
-          <tr>
-            <td><a href="/mark_fav/XRP" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">XRP</button></td>
-            <td>{{jsondata[4]['last_price']}}</td>
-            <td>{{jsondata[4]['24h_change']}}</td>
-            <td>{{jsondata[4]['24h_turnover']}}</td>
-            
-              <td>
-                <a href="/mark_fav/XRP" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Mark Favourite</button>
-              </td>
-            
-          </tr>
-
-          <tr>
-            <td><a href="/mark_fav/MATIC" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Matic</button></td>
-            <td>{{jsondata[5]['last_price']}}</td>
-            <td>{{jsondata[5]['24h_change']}}</td>
-            <td>{{jsondata[5]['24h_turnover']}}</td>
-            
-              <td>
-                <a href="/mark_fav/MATIC" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Mark Favourite</button>
-              </td>
-           
-          </tr>
-
-          <tr>
-            <td><a href="/mark_fav/ADA" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">ADA</button></td>
-            <td>{{jsondata[6]['last_price']}}</td>
-            <td>{{jsondata[6]['24h_change']}}</td>
-            <td>{{jsondata[6]['24h_turnover']}}</td>
-            
-              <td>
-                <a href="/mark_fav/ADA" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Mark Favourite</button>
-              </td>
-            
-          </tr>
-
-          <tr>
-            <td><a href="/mark_fav/SOL" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">SOLANA</button></td>
-            <td>{{jsondata[7]['last_price']}}</td>
-            <td>{{jsondata[7]['24h_change']}}</td>
-            <td>{{jsondata[7]['24h_turnover']}}</td>
-            
-              <td>
-                <a href="/mark_fav/SOL" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(48, 176, 185);">Mark Favourite</button>
-              </td>
-           
-          </tr>
-
-          
+        {% for data in jsondata in  %}
+        <tr>
+          <td>{{data['symbol']}}</td>
+          <td>{{data['last_price']}}</td>
+          <td>{{data['24h_change']}}</td>
+          <td>{{data['24h_low']}}</td>
+          <td>{{data['24h_high']}}</td>
+          <td>{{data['24h_turnover']}}</td>
+          {% if {{data['fav_crypto']}} %}
+            <td>
+              <!-- <button type="button" class="btn btn-outline-success" , style="background-color:rgb(0, 187, 255); font-size: 20px;" onclick="location.href='{{url_for('user_profile')}}'">UnMark Favourite</button> -->
+              <a href="/mark_fav/{{data['symbol']}}" type="button" class="btn btn-outline-dark btn-sm mx-1">UnMark Favourite</button>
+            </td>
+          {% else %}
+            <td>
+              <a href="/mark_fav/{{data['symbol']}}" type="button" class="btn btn-outline-dark btn-sm mx-1">Mark Favourite</button>
+            </td>
+          {% endif %}
+        
+      </tr>
+      {% endfor %}
+          <!-- Add more rows as needed -->
         </tbody>
       </table>
+    {% endif %}
+
+      
+       
       
       <div class="rectangle-parent5">
         <div class="group-child8"></div>
@@ -153,7 +87,7 @@
       <div class="all-cryptos-inner" id="groupContainer14" >
         <div class="rectangle-parent6" >
           <div class="group-child9" autofocus id="favorites"></div>
-          <img class="image-6-icon" alt="" src="/static/images/non_fav.png" />
+          <img class="image-6-icon" alt="" src="/Coinfun/frontend/static/images/non_fav.png" />
           <div class="favorites">Favorites</div>
         </div>
       </div>
@@ -196,7 +130,7 @@
       var groupContainer14 = document.getElementById("logout");
       if (groupContainer14) {
         groupContainer14.addEventListener("click", function (e) {
-          window.location.href = "/";
+          window.location.href = "/login";
           // Please sync "Favourites" to the project
         });
       }

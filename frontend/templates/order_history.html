@@ -33,14 +33,13 @@ rel="stylesheet" href="/static/css/order_history.css"
               <td>{{history['crypto_name']}}</td>
               <td>{{history['crypto_amount']}}</td>
               <td>{{history['crypto_price']}}</td>
-              <td>{{history['crypto_amount']*history['crypto_price']}}</td>
+              <td>{{history['net_usdt']}}</td>
             </tr>
           </tbody>
         </table>
       {% else %}
         <h1>{{msg}}</h1>
       {% endif %}
-      
       <b class="coinfun">Coinfun</b>
     </div>
 

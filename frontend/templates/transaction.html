@@ -33,15 +33,15 @@ rel="stylesheet" href="/static/css/transaction.css"
       </tr>
     </thead>
     <tbody>
-      {% for i in range(data['order_id']|length-1)  %}
+      {% for rows in data%}
         <tr>
-          <td>2023-04-01 10:00:00</td>
-          <td>{{data['order_id'][i]}}</td>
-          <td>{{data['order_type'][i]}}</td>
-          <td>{{data['client'][i][0]}} <br>{{data['client'][i][1]}}</td>
-          <td>{{data['transaction_usdt'][i]}}</td>
-          <td>81 Rs</td>
-          <td>{{'%0.2f Rs'|format(data['transaction_usdt'][i]*81)}}</td>
+          <td>{{rows['time_stamp']}}</td>
+          <td>{{rows['order_id']}}</td>
+          <td>{{rows['order_type']}}</td>
+          <td>{{rows['client'][0]}} <br>{{rows['client'][1]}}</td>
+          <td>{{rows['transaction_usdt']}}</td>
+          <td>{{rows['price']}}</td>
+          <td>{{rows['net_usdt']}}</td>
         </tr>
       {% endfor %}
 

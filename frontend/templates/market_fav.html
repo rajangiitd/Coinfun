@@ -32,15 +32,19 @@ rel="stylesheet" href="/static/css/market_fav.css"
           <th>Name</th>
           <th>Price</th>
           <th>24h Change</th>
+          <th>24h High</th>
+          <th>24h Low</th>
           <th>24h Turnover</th>
         </tr>
       </thead>
       <tbody>
         {% for data  in jsondata %}
         <tr>
-          <td>data[symbol']</td>
+          <td>data['symbol']</td>
           <td>data['last_price']</td>
           <td>data['24h_change']</td>
+          <td>data['24h_high']</td>
+          <td>data['24h_low']</td>
           <td>data['24h_turnover']</td>
         </tr>
         {% endfor %}
@@ -48,7 +52,7 @@ rel="stylesheet" href="/static/css/market_fav.css"
       </tbody>
     </table>
   {%else %}
-    <h1>You don't have any Favourite Currency So far</h1>
+    <h1>{{msg}}</h1>
   {% endif %}
   
   

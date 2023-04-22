@@ -28,14 +28,14 @@ rel="stylesheet" href="/static/css/dashboard.css"
     </div>
     <div class="rectangle-parent25">
       <button class="rectangle-button" autofocus></button>
-      <div class="estimated-balance">Estimated Balance = 0 $</div>
+      <div class="estimated-balance">Estimated Balance = {{data['estimated_balance']}} $</div>
       <div class="div">~</div>
     </div>
     <div class="vikash-container">
-      <div class="vikash1">Viaksh</div>
+      <div class="vikash1">{{data['username']}}</div>
     </div>
     <div class="group-parent4">
-      {% if data['wallet']|length > 0 %}
+      {% if data['data']|length > 0 %}
         <table>
           <thead>
             <tr>
@@ -46,7 +46,7 @@ rel="stylesheet" href="/static/css/dashboard.css"
             </tr>
           </thead>
           <tbody>
-            {% for row in data['wallet'] %}
+            {% for row in data['data'] %}
               <tr>
                 <td>
                   {{rows['name']}}
@@ -59,7 +59,7 @@ rel="stylesheet" href="/static/css/dashboard.css"
           </tbody>
         </table>
       {% else %}
-        <h1 style="font-size: 30px; color: yellowgreen;">Your wallet is Empty</h2>
+        <h1 style="font-size: 30px; color: yellowgreen;">{{msg}}</h2>
       {% endif %}
     
       
