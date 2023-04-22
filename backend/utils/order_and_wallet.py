@@ -3,6 +3,10 @@ import os
 import datetime
 import mysql.connector
 from backend.utils.marketandp2p import get_market_data
+import datetime
+
+def time_convertor_to_str(datetime_obj):
+    return datetime_obj.strftime("%Y-%m-%d %H:%M:%S")
 
 db = mysql.connector.connect(
     host="localhost",
@@ -32,10 +36,11 @@ def get_order_history(email_ID):
             for row in data:
                 temp = {}
                 temp['crypto_name'] = row[1]
-                temp['crypto_price'] = row[2]
+                temp['crypto_price'] = float(row[2])
                 temp['order_type'] = row[3]
-                temp['crypto_amount'] = row[4]
-                temp['timestamp'] = row[5]
+                temp['crypto_amount'] = float(row[4])
+                temp['timestamp'] = time_convertor_to_str(row[5])
+                temp['net_usdt'] = temp['crypto_price']*temp['crypto_amount']
                 history.append(temp)
         return history
     except Exception as e:
@@ -72,4 +77,4 @@ def change_wallet(email_id, order_type, crypto , usdt_qty):
         db.commit()
         return "Wallet Updated Successfully!"
     except Exception as e:
-        raise e 
+        raise e
