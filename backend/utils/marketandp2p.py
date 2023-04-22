@@ -16,32 +16,6 @@ db = mysql.connector.connect(
 )
 cursor = db.cursor()
 
-def get_market_data(email_id= None, filename='market_data.json'):
-    try:
-        # Load market data from JSON file
-        script_directory = os.path.dirname(os.path.abspath(__file__))
-        # Define the path to the data directory relative to the script directory
-        data_directory = os.path.join(script_directory, 'data')
-        file_path = data_directory + '/' + filename
-        with open(file_path) as f:  
-            market_data = json.load(f) # Access contents of the dictionary
-
-        if(email_id == None):
-            for item in market_data:
-                item['symbol'] = (item['symbol'].split("/"))[0]
-            return market_data
-        else:
-            fav_crypto = get_fav_crypto_list(email_id)
-            for item in market_data:
-                item['symbol'] = (item['symbol'].split("/"))[0]
-                if (item['symbol'] in fav_crypto):
-                    item['fav_crypto'] = True
-                else:
-                    item['fav_crypto'] = False
-            return market_data
-    except:
-        raise Exception('Market data could not be fetched!')
-
 def get_fav_crypto_list(email_id):
     try: 
         cursor.execute('SELECT favourites from userinfo where email_id=%s',(email_id,))
@@ -65,6 +39,31 @@ def get_fav_page_data(email_id):
         return fav_page_data
     except Exception as e:
         raise e
+
+def get_market_data(email_id= None, filename='market_data.json'):   # returns a list of dictionaries containing market data
+    try:
+        script_directory = os.path.dirname(os.path.abspath(__file__))
+        # Define the path to the data directory relative to the script directory
+        data_directory = os.path.join(script_directory, 'data')
+        file_path = data_directory + '/' + filename
+        with open(file_path) as f:  
+            market_data = json.load(f) # Access contents of the dictionary
+
+        if(email_id == None):
+            for item in market_data:
+                item['symbol'] = (item['symbol'].split("/"))[0]
+            return market_data
+        else:
+            fav_crypto = get_fav_crypto_list(email_id)
+            for item in market_data:
+                item['symbol'] = (item['symbol'].split("/"))[0]
+                if (item['symbol'] in fav_crypto):
+                    item['fav_crypto'] = True
+                else:
+                    item['fav_crypto'] = False
+            return market_data
+    except:
+        raise Exception('Market data could not be fetched!')
 
 def get_p2p_buy_page_data():
     try:

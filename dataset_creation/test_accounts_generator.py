@@ -30,7 +30,7 @@ def create_test_accounts():
   email_id = "coinfunnoreply2@gmail.com"
   kyc = True
   contact = "12345678920"
-  favourites = "BTC"
+  favourites = ""
   password = encrypt_password(username+username)
   wallet_ = {'USDT': 50000,'BTC': 0, 'ETH': 0, 'BNB': 0, 'DOGE': 0, 'XRP': 0, 'MATIC': 0, 'ADA': 0, 'SOL': 0,'USDT_in_bid': 0}
   # Insert the user data into the database

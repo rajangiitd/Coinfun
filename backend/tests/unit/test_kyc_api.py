@@ -27,3 +27,7 @@ def test_is_single_face_when_image_is_NotBlank():
     file_path = script_directory + '/' + 'trump.jpeg'
     assert is_single_face(convert_to_writable(file_path)) == True
     
+def test_is_single_face_when_image_is_None():
+    with pytest.raises(Exception):
+        is_single_face(None)
+    

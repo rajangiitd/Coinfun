@@ -10,8 +10,8 @@ def test_update_chat_txt_whenInputIsInvalid():
         update_chat_txt(email_id1, email_id1, email_id2, "Hello")
 
 def test_update_chat_txt_whenInputIsValid():
-    email_id1 = "coinfunnoreply2@gmail.com"
-    email_id2 = "coinfunnoreply3@gmail.com"
+    email_id1 = "coinfunnoreply3@gmail.com"
+    email_id2 = "coinfunnoreply2@gmail.com"
     assert update_chat_txt(email_id1, email_id1, email_id2, "Hello") == "Chat messages updated successfully!"
     
 def test_update_chat_image_whenInputIsInvalid():
@@ -23,8 +23,8 @@ def test_update_chat_image_whenInputIsInvalid():
         update_chat_image(email_id1, email_id1, email_id2, convert_to_writable(file_path))
 
 def test_update_chat_image_whenInputIsValid():
-    email_id1 = "coinfunnoreply2@gmail.com"
-    email_id2 = "coinfunnoreply3@gmail.com"
+    email_id1 = "coinfunnoreply3@gmail.com"
+    email_id2 = "coinfunnoreply2@gmail.com"
     script_directory = os.path.dirname(os.path.abspath(__file__)) # Define the path to the data directory relative to the script directory
     file_path = os.path.join(script_directory, 'blank.jpg') # Define the path to the image file relative to the data directory
     assert update_chat_image(email_id1, email_id1, email_id2, convert_to_writable(file_path))=="Chat messages updated successfully!"
