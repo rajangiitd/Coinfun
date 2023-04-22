@@ -4,17 +4,17 @@ order-history
 {% endblock title %}
 
 {% block link %}
-rel="stylesheet" href="/static/css/order_history.css"
+rel="stylesheet" href="/frontend/static/css/order_history.css"
 {% endblock link %}
 
 {%block body %}
 
     <div class="order-history">
-      <button class="rectangle-parent1" autofocus>
-        <div class="group-child1"></div>
-        <div class="your-order-history">Your Order History</div>
-      </button>
       {% if history|length > 0 %}
+        <button class="rectangle-parent1" autofocus>
+          <div class="group-child1"></div>
+          <div class="your-order-history">Your Order History</div>
+        </button>
         <table>
           <thead>
             <tr>

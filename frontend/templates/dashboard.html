@@ -4,7 +4,7 @@ Dashbaord
 {% endblock title %}
 
 {% block link %}
-rel="stylesheet" href="/static/css/dashboard.css"
+rel="stylesheet" href="/frontend/static/css/dashboard.css"
 {% endblock link %}
 
 {%block body %}
@@ -46,12 +46,12 @@ rel="stylesheet" href="/static/css/dashboard.css"
             </tr>
           </thead>
           <tbody>
-            {% for row in data['data'] %}
+            {% for rows in data['data'] %}
               <tr>
                 <td>
                   {{rows['name']}}
                 </td>
-                <td>{{row['amount']}}</td>
+                <td>{{rows['amount']}}</td>
                 <td>{{rows['price']}} $</td>
                 <td>{{rows['est_balance']}} $</td>
               </tr>
