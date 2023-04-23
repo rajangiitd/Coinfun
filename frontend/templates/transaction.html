@@ -17,9 +17,10 @@ rel="stylesheet" href="{{url_for('static',filename='css/transaction.css')}}"
     <div class="your-transaction-history">Your Transaction History</div>
   </button>
 
-{% if msg|length > 0 %}
-   <h2>{{msg}}</h2>
-{% else %}
+  {% if msg|length > 0 %}
+    <h2 class="my-head" style="color: black;position:absolute; top:400px; left:500px;">{{msg}}</h2>
+  {% else %}
+    <!-- <h2 class="my-heading" style="color: black;position:absolute; top: 400px; left:500px;">Vikash </h2> -->
   <table>
     <thead>
       <tr>
@@ -48,7 +49,7 @@ rel="stylesheet" href="{{url_for('static',filename='css/transaction.css')}}"
     </tbody>
   </table>
 
-{% endif %}
+  {% endif %}
   
 
 

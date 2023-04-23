@@ -10,10 +10,10 @@ rel="stylesheet" href="{{url_for('static',filename='css/dashboard.css')}}"
 {%block body %}
 
 <div class="dropdown">
-  <button type="button" class="btn btn-success" style="font-size: large; background-color: aqua;" onclick="location.href='{{url_for('user_profile')}}'">Check Profile</button>
-  <button type="button" class="btn btn-success" style="font-size: large; background-color: aqua;" onclick="location.href='{{url_for('change_password')}}'">Change Password</button><br><br>
-  <button type="button" class="btn btn-success" style="font-size: large; background-color: aqua;" onclick="location.href='{{url_for('order_history')}}'">Check Your Order History</button><br><br>
-  <button type="button" class="btn btn-success" style="font-size: large; background-color: aqua;" onclick="location.href='{{url_for('transaction')}}'">Check Your Transaction History</button>
+  <button type="button" class="btn-success2" style="border-radius: 10px;width: 200px;height: 30px;font-size: large; background-color: aqua;" onclick="location.href='{{url_for('change_password')}}'">Change Password</button><br><br>
+  <button type="button" class="btn-success3" style="border-radius: 10px;width: 200px;height: 30px;font-size: large; background-color: aqua;" onclick="location.href='{{url_for('order_history')}}'">Order History</button><br><br>
+  <button type="button" class="btn-success4" style="border-radius: 10px;width: 200px;height: 30px;font-size: large; background-color: aqua;" onclick="location.href='{{url_for('transaction')}}'">Transaction History</button><br><br>
+  <button type="button" class="btn-success1" style="border-radius: 10px;width: 200px;height: 30px;font-size: large; background-color: aqua;" onclick="location.href='{{url_for('user_profile')}}'">User Profile</button>
 </div>
 
 <div class="center-align">

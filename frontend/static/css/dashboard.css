@@ -10,6 +10,24 @@ body{
       box-shadow: inset 0 0 14px 0 rgb(0 0 0/50%);
     }
   }
+  /* .btn-success1 {
+    background-color: var(--color-green-500);
+    color: var(--color-white);
+    border: 0;
+    padding: 0;
+    border-radius: var(--br-base);
+    font-size: var(--font-size-base);
+    font-weight: 900;
+    font-family: var(--font-roboto);
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  } */
+  .dropdown {
+    position: relative;
+    display: inline-block;
+    
+  }
   .dashboard-child,
   .group-child21 {
     position: absolute;
@@ -174,6 +192,15 @@ body{
     height: 44px;
     color: whitesmoke;
   }
+  .rectangle-parent25 {
+    position: absolute;
+    top: 300px;
+    left: 609px;
+    width: 308px;
+    height: 44px;
+    font-size: var(--font-size-sm);
+    color: whitesmoke;
+  }
   .group-child26 {
     position: absolute;
     top: 0;
@@ -214,9 +241,18 @@ body{
     background-color: slateblue;
     top: 0;
     left: 0;
-    border-radius: var(--br-2xl-5);
-    width: 205px;
-    height: 41px;
+    border-radius: 10px;
+    /* width: auto;
+    padding: 5px 10px;
+    height: 41px; */
+    width: 1000px;
+    height: 40px;
+    display: flex;
+    flex-direction: row;
+    padding: 4px 25px;
+    box-sizing: border-box;
+    align-items: flex-start;
+    justify-content: flex-start;
   }
   .div,
   .estimated-balance {
@@ -233,15 +269,7 @@ body{
     width: 8px;
     height: 14px;
   }
-  .rectangle-parent25 {
-    position: absolute;
-    top: 300px;
-    left: 609px;
-    width: 308px;
-    height: 41px;
-    font-size: var(--font-size-sm);
-    color: whitesmoke;
-  }
+
   .vikash1 {
     position: relative;
     font-weight: 900;

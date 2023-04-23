@@ -46,6 +46,14 @@
   width: 129px;
   height: 43px;
 }
+.my-heading,
+.my-head{
+  color: black;
+  background-color: black;
+  font-size: large;
+
+}
+
 .p2p4 {
   position: absolute;
   top: 10px;

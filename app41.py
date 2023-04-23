@@ -45,72 +45,77 @@ def first():
 
 @app.route('/login', methods =['POST'])
 def login():
-	message = ''
-	if request.method == 'POST' and 'email' in request.form and 'password' in request.form:
-		email = request.form['email']
-		password = request.form['password']
-		
-		cursor.execute('SELECT * FROM userinfo WHERE email_id = %s AND password = %s', (email,encrypt_password(password),))
-		account = cursor.fetchone()
-		if account != None:
-			session['loggedin'] = True
-			session['id'] = account[0]
-			session['username'] = account[1]
-			message = 'Logged in successfully !'
-			return redirect(url_for('dashboard',userid=session['id']))
-		else:
-			message = 'Incorrect username / password !'
-	return render_template('login.html', msg = message)
+    try:
+        message = ''
+        if request.method == 'POST' and 'email' in request.form and 'password' in request.form:
+            email = request.form['email']
+            password = request.form['password']	
+            cursor.execute('SELECT * FROM userinfo WHERE email_id = %s AND password = %s', (email,encrypt_password(password),))
+            account = cursor.fetchone()
+            if account != None:
+                session['loggedin'] = True
+                session['id'] = account[0]
+                session['username'] = account[1]
+                message = 'Logged in successfully !'
+                return redirect(url_for('dashboard',userid=session['id']))
+            else:
+                message = 'Incorrect username / password !'
+    except Exception as e:
+        message = str(e)
+    return render_template('login.html', msg = message)
 
 
 @app.route('/register', methods=['POST','GET'])
 def register():
-    msg = ''
-    if request.method == 'POST' and 'username' in request.form and 'email' in request.form and 'password' in request.form and 'confirm-password' in request.form and 'phone-number' in request.form:
-        username = request.form['username']
-        password = request.form['password']
-        email = request.form['email']
-        confirm_password=request.form['confirm-password']
-        phone_number = request.form['phone-number']
-        # profile_pic = request.files['profile_pic']
-        # if profile_pic and allowed_file(profile_pic.filename):
-        #     filename = secure_filename(profile_pic.filename)
-        #     profile_pic.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        #     pic = url_for('static', filename='uploads/' + filename)
-        # else:
-        script_directory = os.path.dirname(os.path.abspath(__file__))
-        # Define the path to the data directory relative to the script directory
-        data_directory = os.path.join(script_directory, 'backend','utils','data')
-        file_path = data_directory + '/' + 'blank.jpg'
-        pic = convert_to_writable(file_path)
-        # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM userinfo WHERE email_id = % s', (email,))
-        user = cursor.fetchone()
-        if (user != None):
-            msg = 'Account already exists !'
-        elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
-            msg = 'Invalid email address !'
-        elif not re.match(r'[A-Za-z0-9]+', username):
-            msg = 'Username must contain only characters and numbers !'
-        elif password!=confirm_password:
-            msg = 'Password and confirm-Password must be same'
-        elif is_password_valid(password) == False:
-            msg = 'Password must contains letters and numbers both'
-        else:
-            cursor.execute('INSERT INTO userinfo VALUES ( % s, % s, % s, "{"ADA": 0.0, "BNB": 0.0, "BTC": 0.0, "ETH": 0.0, "SOL":  0.0, "XRP": 0.0, "DOGE": 0.0, "USDT": 0.0, "MATIC": 0.0, "USDT_in_bid": 0.0}", "", % s, false,%s)', (email,username, encrypt_password(password),pic,phone_number, ))
-            # mysql.connection.commit()
-            cursor.execute('SELECT email_id, username FROM userinfo WHERE email_id = %s', (email,))
-            result = cursor.fetchone()
-            user_id = result[0]
-            username = result[1]
-            # Set session variables
-            session['loggedin'] = True
-            session['id'] = user_id
-            session['username'] = username
-            msg = 'You have successfully registered !'
-            return redirect(url_for('dashboard'))
-    elif request.method == 'POST':
-        msg = 'Please fill all the blank columns !'
+    try:
+        msg = ''
+        if request.method == 'POST' and 'username' in request.form and 'email' in request.form and 'password' in request.form and 'confirm-password' in request.form and 'phone-number' in request.form:
+            username = request.form['username']
+            password = request.form['password']
+            email = request.form['email']
+            confirm_password=request.form['confirm-password']
+            phone_number = request.form['phone-number']
+            # profile_pic = request.files['profile_pic']
+            # if profile_pic and allowed_file(profile_pic.filename):
+            #     filename = secure_filename(profile_pic.filename)
+            #     profile_pic.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            #     pic = url_for('static', filename='uploads/' + filename)
+            # else:
+            script_directory = os.path.dirname(os.path.abspath(__file__))
+            # Define the path to the data directory relative to the script directory
+            data_directory = os.path.join(script_directory, 'backend','utils','data')
+            file_path = data_directory + '/' + 'blank.jpg'
+            pic = convert_to_writable(file_path)
+            # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute('SELECT * FROM userinfo WHERE email_id = %s', (email,))
+            user = cursor.fetchone()
+            if (user != None):
+                msg = 'Account already exists !'
+            elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
+                msg = 'Invalid email address !'
+            elif not re.match(r'[A-Za-z0-9]+', username):
+                msg = 'Username must contain only characters and numbers !'
+            elif password!=confirm_password:
+                msg = 'Password and confirm-Password must be same'
+            elif is_password_valid(password) == False:
+                msg = 'Password must contains letters and numbers both'
+            else:
+                cursor.execute('INSERT INTO userinfo VALUES ( %s, %s, %s, "{"ADA": 0.0, "BNB": 0.0, "BTC": 0.0, "ETH": 0.0, "SOL":  0.0, "XRP": 0.0, "DOGE": 0.0, "USDT": 0.0, "MATIC": 0.0, "USDT_in_bid": 0.0}", "", % s, false,%s)', (email,username, encrypt_password(password),pic,phone_number, ))
+                # mysql.connection.commit()
+                cursor.execute('SELECT email_id, username FROM userinfo WHERE email_id = %s', (email,))
+                result = cursor.fetchone()
+                user_id = result[0]
+                username = result[1]
+                # Set session variables
+                session['loggedin'] = True
+                session['id'] = user_id
+                session['username'] = username
+                msg = 'You have successfully registered !'
+                return redirect(url_for('dashboard'))
+        elif request.method == 'POST':
+            msg = 'Please fill all the blank columns !'
+    except Exception as e:
+        msg = str(e)
     return render_template('register.html', msg = msg)
 
 
@@ -318,14 +323,14 @@ def order_history():
     return render_template('order_history.html',history=history,msg=msg)
     
 @app.route('/exchange_btc/<string:crypto>/<string:time_frame>')
-def exchange_btc_1m(crypto,time_frame):
+def exchange_btc(crypto,time_frame):
     image = ''
-    crypto_details = []
+    crypto_details = {}
     try:
-        (image,crypto_details) = market.form_graph(crypto,time_frame)
+        (image,crypto_details) = form_graph(crypto,time_frame)
     except Exception as e:
         msg = str(e)
-    return render_template('exchange_btc.html',image=image,crypto_details=crypto_details)
+    return render_template('btc_graph.html',image=image,data=crypto_details)
 
 @app.route('/change_wallet/<string:order_type>/<string:crypto>/<float:usdt_qty>')
 def change_wallet(order_type, crypto, usdt_qty):

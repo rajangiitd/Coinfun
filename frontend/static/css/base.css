@@ -92,14 +92,14 @@ body{
     top: 0;
     left: 0;
     border-radius: var(--br-2xl-5);
-    background-color: yellowgreen;
+    background-color: rgb(104, 144, 23);
     width: 106px;
     height: 43px;
     text-align: right;
 
 }
 
-.logout {
+/* .logout {
     position: absolute;
     align-content: end;
     top: 8.39px;
@@ -108,7 +108,7 @@ body{
     display: inline-block;
     width: 64px;
     height: 24.12px;
-}
+} */
 
 .rectangle-container {
     position: absolute;

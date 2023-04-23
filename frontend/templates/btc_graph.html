@@ -13,7 +13,7 @@ rel="stylesheet" href="{{url_for('static',filename='css/btc_graph.css')}}"
  
   <div class="group-div">
     <div class="group-child1"></div>
-    <div class="btcusdt">{{data['symbol']}}/USDT</div>
+    <div class="btcusdt">{{data['symbol']}} USDT</div>
   </div>
   <div class="btc-graph-inner">
     <div class="rectangle-parent1">
@@ -90,6 +90,18 @@ rel="stylesheet" href="{{url_for('static',filename='css/btc_graph.css')}}"
       </div>
     </div>
   </div>
+
+  <p>
+    {% if condition %}
+      
+    {% elif condition2 %}
+      
+    {% else %}
+      
+    {% endif %}
+  </p>
+
+
 </div>
 
 <script>
@@ -112,7 +124,7 @@ rel="stylesheet" href="{{url_for('static',filename='css/btc_graph.css')}}"
   var groupContainer = document.getElementById("logout");
   if (groupContainer) {
     groupContainer.addEventListener("click", function (e) {
-      window.location.href = "/login";
+      window.location.href = "/";
       // Please sync "login" to the project
     });
   }

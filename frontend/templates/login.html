@@ -17,7 +17,7 @@
         <br>
         <div>
             {% if msg|length > 0 %}
-            <p>{{ msg }}</p>
+            <p id="msg" style="color:red">{{ msg }}</p>
             {% endif %}
             <p>Forgot your password? <a href="/">Reset Password</a></p>
         </div>
@@ -26,6 +26,19 @@
     <div>
         <p>New User ? <a href="/register"> Register</a></p>
     </div>
+
+    <script>
+        function showMessage(message, duration) {
+		var messageElement = document.getElementById("msg");
+		messageElement.innerHTML = message;
+		messageElement.style.display = "block";
+		setTimeout(function() {
+			messageElement.style.display = "none";
+		}, duration);
+		}
+		var message = "{{msg}}";
+		showMessage(message, 5000);
+    </script>
 
 
 </body>

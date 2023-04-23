@@ -101,7 +101,13 @@ def form_graph(crypto, time_frame, horizontal_size=16, vertical_size=8):
         df = pd.DataFrame(currency_data)
         
         market_data = get_market_data()
-        crypto_details = next((item for item in market_data if item['symbol'].startswith(crypto)), {})
+        # crypto_details = next((item for item in market_data if item['symbol'].startswith(crypto)), {})
+        crypto_details = {}
+        for item in market_data:
+            temp = (item['symbol'].split('/'))[0]
+            if (temp == crypto):
+                crypto_details = item
+                crypto_details['symbol'] = crypto
         
         # Convert timestamps to dates
         df['Timestamp'] = pd.to_datetime(df['Timestamp'], format='%Y-%m-%dT%H:%M:%S.%f')
