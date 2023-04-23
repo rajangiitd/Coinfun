@@ -4,29 +4,24 @@ user-profile
 {% endblock title %}
 
 {% block link %}
-rel="stylesheet" href="/frontend/static/css/user_profile.css"
+rel="stylesheet" href="{{url_for('static',filename='css/user_profile.css')}}"
 {% endblock link %}
 
 {%block body %}
 <h1 style="color: rgb(255, 0, 157); margin-left: 800px; font-size: 60px;">Coinfun</h1>
-  {% if msg|length == 0 %}
-    <div class="user_profile">
-      <div class="user_profile1" style="margin-left: 100px;">
-        <p>Username: {{data['username']}}</p>
-        <p>Email: {{data['email_id']}}</p>
-        <p>Phone: {{data['contact_number']}}</p>
-        <p>Status: {{data['kyc']}}</p>
-      </div>
-      <div class="change_photo">
-        <img src="/frontend/static/images/user.png" alt="Profile_Pic"
-          style="margin-right: 100px; margin-top: 100px; height: 150px; width: 150px; border-radius: 20px; ">
-        <button type="submit" class="btn btn-success"
-          style="font-size: 30px; color: yellow; background-color: black; border-radius: 10px; margin-top: 20px; margin-right: 70px;">User</button>
-      </div>
+  <div class="user_profile">
+    <div class="user_profile1" style="margin-left: 100px;">
+      <p>Username: {{data['username']}}</p>
+      <p>Email: {{data['email_id']}}</p>
+      <p>Phone: {{data['contact_number']}}</p>
+      <p>Status: {{data['kyc']}}</p>
     </div>
-  {% else %}
-    {{msg}}
-  {% endif %}
+    <div class="change_photo">
+      <img src="{{url_for('static',filename='images/user.png')}}" alt="Profile_Pic"
+        style="margin-right: 100px; margin-top: 100px; height: 150px; width: 150px; border-radius: 20px; ">
+      <button type="submit" class="btn btn-success"
+        style="font-size: 30px; color: yellow; background-color: black; border-radius: 10px; margin-top: 20px; margin-right: 70px;">Change Photo</button>
+    </div>
 
 
 

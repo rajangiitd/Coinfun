@@ -4,7 +4,7 @@ order-history
 {% endblock title %}
 
 {% block link %}
-rel="stylesheet" href="/frontend/static/css/order_history.css"
+rel="stylesheet" href="{{url_for('static',filename='css/order_history.css')}}"
 {% endblock link %}
 
 {%block body %}

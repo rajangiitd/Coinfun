@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="initial-scale=1, width=device-width" />
-    <link rel="stylesheet" href="/frontend/static/css/global.css" />
-    <link rel="stylesheet" href="/frontend/static/css/market_allcrypto.css" />
+    <link rel="stylesheet" href="{{url_for('static',filename='css/global.css')}}" />
+    <link rel="stylesheet" href="{{url_for('static',filename='css/market_allcrypto.css')}}" />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;900&display=swap"
@@ -87,7 +87,7 @@
       <div class="all-cryptos-inner" id="groupContainer14" >
         <div class="rectangle-parent6" >
           <div class="group-child9" autofocus id="favorites"></div>
-          <img class="image-6-icon" alt="" src="/frontend/static/images/non_fav.png" />
+          <img class="image-6-icon" alt="" src="{{url_for('static',filename='images/fav.png')}}" />
           <div class="favorites">Favorites</div>
         </div>
       </div>
@@ -137,14 +137,14 @@
       var btn = document.getElementById("mark_unfav");
       if (btn) {
         btn.addEventListener("click", function (e) {
-          btn.innerHTML= "Mark Favourite";
+          btn.innerText= "Mark Favourite";
           // Please sync "Favourites" to the project
         });
       }
       var btn1 = document.getElementById("mark_fav");
       if (btn1) {
         btn1.addEventListener("click", function (e) {
-          btn1.innerHTML= "Mark UnFavourite";
+          btn1.innerText= "Mark UnFavourite";
           // Please sync "Favourites" to the project
         });
       }

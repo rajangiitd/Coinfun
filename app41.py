@@ -279,8 +279,8 @@ def user_profile():
     
 @app.route('/upload_pic',methods = ['GET','POST'])
 def upload_pic():
+    msg = ''
     if request.method == "POST":
-    # msg = ''
         try:
             if 'photo' in request.files:
                 photo = request.files['photo']
@@ -296,7 +296,7 @@ def upload_pic():
             msg = 'IMAGE UPDATED SUCCESSFULLY!'
         except:
             msg = 'IMAGE CANNOT BE UPDATED!'
-        return render_template('profile_pic.html',msg)
+        return render_template('profile_pic.html',msg=msg)
     else:
         try:
             cursor.execute('SELECT profile_pic from userinfo where email_id=%s',(session['id']))

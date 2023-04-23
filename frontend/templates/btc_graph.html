@@ -4,7 +4,7 @@ Currency-Graph
 {% endblock title %}
 
 {% block link %}
-rel="stylesheet" href="/frontend/static/css/btc_graph.css"
+rel="stylesheet" href="{{url_for('static',filename='css/btc_graph.css')}}"
 {% endblock link %}
 
 {%block body %}
@@ -51,7 +51,7 @@ rel="stylesheet" href="/frontend/static/css/btc_graph.css"
       </div>
     </div>
   </div>
-  <b class="coinfun">Coinfun</b><img class="image-14-icon" alt="" src="/frontend/static/images/polygon.png" />
+  <b class="coinfun">Coinfun</b><img class="image-14-icon" alt="" src="{{url_for('static',filename='images/polygon.png')}}" />
   <div class="btc-graph-inner4">
     <button class="rectangle-parent5">
       <div class="group-child6"></div>
