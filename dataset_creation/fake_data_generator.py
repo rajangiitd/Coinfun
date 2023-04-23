@@ -259,7 +259,7 @@ def generate_fake_P2PTradeHistoryData_chat(datasize):
       mydb.commit()
     print("P2PTradeHistoryData and chat table data addition done for ", buyer_email_id, seller_email_id)
         
-data_size = 40
+data_size = 45
 generate_fake_userinfo_p2pbidding_crptotradinghistory_data(data_size)
 print("3 tables done")
 generate_fake_P2PTradeHistoryData_chat(data_size)

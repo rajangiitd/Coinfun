@@ -21,10 +21,10 @@ cursor = db.cursor()
 # Fetch the image data for person1 from the user_info table
 email_id = "person1@gmail.com"
 cursor.execute("SELECT profile_pic FROM userinfo WHERE email_id=%s", (email_id,))
-image_data = cursor.fetchall()[0]
-
+image_data = cursor.fetchone()[0]
+# print(image_data)
 # Decode the base64 encoded image
-decoded_image = base64.b64decode(image_data[0])
+decoded_image = base64.b64decode(image_data)
 
 # Open the image using PIL
 image = Image.open(io.BytesIO(decoded_image))

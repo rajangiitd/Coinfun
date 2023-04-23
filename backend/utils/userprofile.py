@@ -1,6 +1,8 @@
 import mysql.connector
 from backend.utils.encryption_scheme import is_password_valid, encrypt_password
-
+import base64
+from PIL import Image
+import io
 db = mysql.connector.connect(
     host="localhost",
     user="root",
@@ -18,7 +20,11 @@ def get_user_profile(email):
         details = cursor.fetchone()
         
         data['username'] = details[1]
-        data['profile_pic'] = details[5]
+        try:
+            data['profile_pic'] = base64.b64decode(details[5])
+            data['profile_pic'] = details[5].decode('UTF-8')
+        except:
+            data['profile_pic'] = ""
         data['kyc'] = details[6]
         data['contact_number'] = details[7]
         return data
@@ -49,3 +55,4 @@ def change_pass_help(email, current_pass, new_pass, new_pass_confirm):
             return 'PASSWORD UPDATED SUCCESSFULLY'
     except Exception as e:
         raise e
+

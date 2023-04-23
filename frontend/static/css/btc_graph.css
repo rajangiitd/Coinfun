@@ -405,7 +405,7 @@
   position: relative;
   width: 100%;
   height: 875px;
-  overflow: hidden;
+  overflow: visible;
   background-image: url(./public/btc-graph@3x.png);
   background-size: cover;
   background-repeat: no-repeat;
@@ -415,3 +415,11 @@
   color: var(--color-black);
   font-family: var(--font-roboto);
 }
+.container{
+  position: absolute;
+  width: 100%;
+  height: 875px;
+  overflow: visible;
+
+}
+

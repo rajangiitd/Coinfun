@@ -54,7 +54,7 @@
         {% for data in jsondata %}
         <tr>
           <td>
-            <a href="/exchange_btc/{{data['symbol']}}/1m"  type="text" >{{data['symbol']}}</a> 
+            <a href="/trade_page/{{data['symbol']}}/1m"  type="text" >{{data['symbol']}}</a> 
           </td>
           <td>{{data['last_price']}}</td>
           <td>{{data['24h_change']}}</td>
@@ -64,11 +64,11 @@
           {% if data['fav_crypto'] %}
             <td>
               <!-- <button type="button" class="btn btn-outline-success" , style="background-color:rgb(0, 187, 255); font-size: 20px;" onclick="location.href='{{url_for('user_profile')}}'">UnMark Favourite</button> -->
-              <a href="/mark_unfav/{{data['symbol']}}" type="button" autofocus_id="mark_unfav" class="btn btn-outline-dark btn-sm mx-1">Mark Unfavourite</a>
+              <a href="/mark_unfav/{{data['symbol']}}" type="button" autofocus id="mark_unfav" class="btn btn-outline-dark btn-sm mx-1">Mark Unfavourite</a>
             </td>
           {% else %}
             <td>
-              <a href="/mark_fav/{{data['symbol']}}" type="button" autofocus_id="mark_fav"  class="btn btn-outline-dark btn-sm mx-1">Mark Favourite</a>
+              <a href="/mark_fav/{{data['symbol']}}" type="button" autofocus id="mark_fav"  class="btn btn-outline-dark btn-sm mx-1">Mark Favourite</a>
             </td>
           {% endif %}
         
@@ -132,21 +132,25 @@
       var groupContainer14 = document.getElementById("logout");
       if (groupContainer14) {
         groupContainer14.addEventListener("click", function (e) {
-          window.location.href = "/login";
+          window.location.href = "/";
           // Please sync "Favourites" to the project
         });
       }
       var btn = document.getElementById("mark_unfav");
       if (btn) {
         btn.addEventListener("click", function (e) {
-          btn.innerText= "Mark Favourite";
-          // Please sync "Favourites" to the project
+          e.preventDefault(); // Prevent the button from reloading
+          btn.innerText = "Mark Favourite";
+          console.log("Button clicked!"); // Check if the code is executed
         });
       }
+
       var btn1 = document.getElementById("mark_fav");
       if (btn1) {
         btn1.addEventListener("click", function (e) {
+          e.preventDefault(); // Prevent the button from reloading
           btn1.innerText= "Mark UnFavourite";
+          console.log("Button clicked!"); // Check if the code is executed
           // Please sync "Favourites" to the project
         });
       }

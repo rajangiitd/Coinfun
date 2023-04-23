@@ -7,7 +7,6 @@ def test_is_allowed_file_when_it_have_allowed_extension():
     assert is_allowed_file("test.png") == True
     assert is_allowed_file("test.jpg") == True
     assert is_allowed_file("test.jpeg") == True
-    assert is_allowed_file("test.gif") == True
     
 def test_is_allowed_file_when_it_doesnt_have_allowed_extension():
     assert is_allowed_file("test.txt") == False

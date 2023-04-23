@@ -23,6 +23,8 @@ from datetime import datetime, timedelta
 import re 
 import os
 import base64
+import io
+from PIL import Image
 
 # app=Flask(__name__, static_folder='/frontend/static',template_folder='/frontend/templates')
 
@@ -81,11 +83,12 @@ def register():
             #     profile_pic.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             #     pic = url_for('static', filename='uploads/' + filename)
             # else:
-            script_directory = os.path.dirname(os.path.abspath(__file__))
+            #script_directory = os.path.dirname(os.path.abspath(__file__))
             # Define the path to the data directory relative to the script directory
-            data_directory = os.path.join(script_directory, 'backend','utils','data')
-            file_path = data_directory + '/' + 'blank.jpg'
-            pic = convert_to_writable(file_path)
+            #data_directory = os.path.join(script_directory, 'backend','utils','data')
+            #file_path = data_directory + '/' + 'blank.jpg'
+            #pic = convert_to_writable(file_path)
+            pic = ""
             # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute('SELECT * FROM userinfo WHERE email_id = %s', (email,))
             user = cursor.fetchone()
@@ -153,9 +156,9 @@ def otp_verification():
         entered_otp = request.form['otp']
         if entered_otp == session['otp']:
             # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute('UPDATE userinfo SET kyc = true WHERE email_id = % s', (session['id'],))
-            mysql.connection.commit()
-            return redirect(url_for('dashboard'))
+            # cursor.execute('UPDATE userinfo SET kyc = true WHERE email_id = % s', (session['id'],))
+            # mysql.connection.commit()
+            return redirect(url_for('reset_password'))
         else:
             return render_template('otp_verification.html', msg='Invalid OTP. Please try again.')
     elif request.method == 'POST':
@@ -168,6 +171,52 @@ def otp_verification():
         except Exception as e:
             msg = str(e)
         return render_template('otp_verification.html',msg=msg)
+
+@app.route('/enter_email', methods=['GET', 'POST'])
+def enter_email():
+    msg = ''
+    try:
+        if request.method == 'POST' and 'email' in request.form:
+            email = request.form['email']
+            cursor.execute('SELECT * FROM userinfo WHERE email_id = %s', (email,))
+            user = cursor.fetchone()
+            if (user == None):
+                msg = 'Account does not exists !'
+            elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
+                msg = 'Invalid email address !'
+            else:
+                msg = 'OTP sent successfully to your registered email ID'
+                session['id'] = email
+                return render_template('forgotpasswordotp.html',msg=msg)
+        else:
+            msg = 'Please enter the email !'
+        
+    except Exception as e:
+        msg = str(e)
+    return render_template('forgotdpasswordemailreset.html', msg = msg)
+
+@app.route('/reset_password', methods=['GET', 'POST'])
+def reset_password():
+    msg = ''
+    try:
+        if request.method == 'POST' and 'new_password' in request.form and 'confirm_new_password' in request.form:
+            newpass = request.form['new_password']
+            newpass_confirm = request.form['confirm_new_password']
+            if (newpass != newpass_confirm):
+                msg = 'New Password does not matches the Confirm Password !' 
+            else:
+                cursor.execute('UPDATE userinfo SET password = %s where email_id = %s',(encrypt_password(newpass),session['id'],))
+                db.commit()
+                msg = 'Password updated successfully !'
+                return redirect(url_for("first"))
+        elif request.method == 'POST':
+            msg = 'Please fill all the blank columns !'
+    except Exception as e:
+        msg = str(e)
+    return render_template('forgotpasswordresetsuccessful.html',msg=msg)
+
+
+    
 
 @app.route('/market_allcrypto')
 def market():
@@ -194,7 +243,8 @@ def mark_fav(fav):
 def mark_unfav(fav):
     cursor.execute('Select favourites from userinfo where email_id = %s',(session['id'],))
     favourites = (cursor.fetchone()[0]).split(',')
-    favourites.remove(fav)
+    if fav in favourites:
+        favourites.remove(fav)
     favourites = ",".join(favourites)
     cursor.execute("UPDATE userinfo SET favourites = %s WHERE email_id =%s",(favourites,session['id'],))
     db.commit()
@@ -276,40 +326,70 @@ def market_fav():
 def user_profile():
     data= {}
     msg = ''
-    try:
-        data  = get_user_profile(session['id'])
-    except Exception as e:
-        msg = str(e)
+    data = get_user_profile(session['id'])
+    # try:
+    #     data  = get_user_profile(session['id'])
+    #     print(data['username'])
+    #     if data['profile_pic']!="":
+    #         print(data['kyc'])
+    #         data['profile_pic'] = 'data:image/png;base64,' + data['profile_pic'].decode('utf-8')
+    #         print(data['kyc'])
+    # except Exception as e:
+    #     msg = str(e)
+    #     print(msg)
     return render_template('user_profile.html', data=data,msg=msg)
     
 @app.route('/upload_pic',methods = ['GET','POST'])
 def upload_pic():
     msg = ''
+    
+    if 'id' not in session:
+        return redirect(url_for('login'))
+    
     if request.method == "POST":
         try:
+            print(request.files)
             if 'photo' in request.files:
                 photo = request.files['photo']
-                if photo.filename != '':
-                    # Check if the file has an allowed image extension
-                    if is_allowed_file(photo.filename):
-                        # Read the binary data from the file
-                        data = photo.read()
-                # Encode the binary data as base64
-                        encoded_data = base64.b64encode(data)
-            cursor.execute('INSERT INTO userinfo (profile_pic) values (%s) where email_id=%s',(encoded_data,session['id']))
-            db.commit()
-            msg = 'IMAGE UPDATED SUCCESSFULLY!'
-        except:
+                if photo.filename != '' and is_allowed_file(photo.filename): # Check if the file has an allowed image extension
+                    # Read the binary data from the file
+                    image_data = photo.read()
+                    encoded_data = base64.b64encode(image_data) # Encode the binary data as base64
+                    cursor.execute('UPDATE userinfo SET profile_pic = %s WHERE email_id = %s', (encoded_data, session['id']))
+                    db.commit()
+
+                    msg = 'IMAGE UPDATED SUCCESSFULLY!'
+                    #user_data['profile_pic_ext'] = os.path.splitext(photo.filename)[-1]
+                    # user_data['profile_pic'] = 'data:image/png;base64,' + base64.b64encode(user_data['profile_pic']).decode('utf-8')
+                    #image = 'data:image/'+user_data['profile_pic_ext']+';base64,' + encoded_data.decode('utf-8')
+                    #user_data['profile_pic']= image
+                    print(5)
+                else:
+                    msg="Only png , jpg and jpeg format is allowed"
+                    # user_data['profile_pic_ext'] = os.path.splitext(photo.filename)[-1]
+                    # image = 'data:image/png;base64,' + base64.b64encode(user_data['profile_pic']).decode('utf-8')
+                    # user_data['profile_pic']= image
+                    print(6)
+            user_data= get_user_profile(session['id'])
+            return redirect(url_for('user_profile'))
+            #return render_template('user_profile.html',data= user_data,msg=msg)
+        except Exception as e:
+            print(e)
             msg = 'IMAGE CANNOT BE UPDATED!'
-        return render_template('profile_pic.html',msg=msg)
+            # if user_data['profile_pic']!="":
+                # user_data['profile_pic'] = 'data:image/png;base64,' + base64.b64encode(user_data['profile_pic']).decode('utf-8')   
+            user_data= get_user_profile(session['id'])
+            return render_template('user_profile.html',data=user_data,msg=msg)
     else:
+        print(8)
+        print("LAG GYE")
         try:
             cursor.execute('SELECT profile_pic from userinfo where email_id=%s',(session['id']))
-            image = cursor.fetchone()['profile_pic']
+            image = cursor.fetchone()[0]
             image = base64.b64decode(image)
         except :
             msg = 'IMAGE CANNOT BE ACCESED AT THE MOMENT !'
-        return render_template('profile_pic.html',image=image,msg=msg)
+        return render_template('user_profile.html',data = user_data,msg=msg)
         
         
 @app.route('/order_history')
@@ -322,12 +402,16 @@ def order_history():
         msg = str(e)
     return render_template('order_history.html',history=history,msg=msg)
     
-@app.route('/exchange_btc/<string:crypto>/<string:time_frame>')
-def exchange_btc(crypto,time_frame):
+@app.route('/trade_page/<string:crypto>/<string:time_frame>')
+def trade_page(crypto,time_frame):
     image = ''
     crypto_details = {}
     try:
         (image,crypto_details) = form_graph(crypto,time_frame)
+        wallet_data = get_wallet_data(session['id'])
+        crypto_details["crypto_size"] = wallet_data[crypto]
+        crypto_details["USDT"] = wallet_data["USDT"]
+        crypto_details["Current_crypto_value"] = crypto_details["last_price"]*crypto_details["crypto_size"]
     except Exception as e:
         msg = str(e)
     return render_template('btc_graph.html',image=image,data=crypto_details)
@@ -338,7 +422,8 @@ def change_wallet(order_type, crypto, usdt_qty):
         change_wallet(session['id'],order_type,crypto,usdt_qty)
     except Exception as e:
         msg = str(e)
-    return redirect(url_for('exchange_btc_1m'))
+    return redirect(url_for('trade_page'))
+
 
 @app.route('/chat_buy/<string:seller_mailID>',methods = ['GET','POST'])
 def chat_buy(seller_mailID):
@@ -362,11 +447,17 @@ def chat_buy(seller_mailID):
         msg = ''
         # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT chat_messages FROM chat WHERE (email_id1 = %s AND email_id2 = %s) OR (email_id1 = %s AND email_id2 = %s)',(session['id'],seller_mailID,seller_mailID,session['id'],))
-        t = cursor.fetchone()[0]
-        data = json.loads(t)
-        if len(data[seller_mailID]) == 0 and len(data[session['id']]) == 0:
-            msg = 'No messages'
-        return render_template('chat_buy.html',data=data,msg=msg)
+        t = cursor.fetchone()
+        if t!=None:
+            data = json.loads(t[0])
+            if len(data[seller_mailID]) == 0 and len(data[session['id']]) == 0:
+                msg = 'No messages'
+            return render_template('chat_buy.html',data=data,msg=msg)
+        else:
+            msg="No Message"
+            data=[]
+            return render_template('chat_buy.html',data=data,msg=msg)
+            
 
 @app.route('/chat_sell/<string:buyer_mailID>',methods = ['GET','POST'])
 def chat_sell(buyer_mailID):
@@ -391,12 +482,16 @@ def chat_sell(buyer_mailID):
         msg = ''
         # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT chat_messages FROM chat WHERE (email_id1 = %s AND email_id2 = %s) OR (email_id1 = %s AND email_id2 = %s)',(session['id'],buyer_mailID,buyer_mailID,session['id'],))
-        t = cursor.fetchone()['chat_messages']
-        data = json.loads(t)
-        if len(data[buyer_mailID]) == 0 and len(data[session['id']]) == 0:
-            msg = 'No messages'
-        return render_template('chat_sell.html',data=data,msg=msg)
- 
+        t = cursor.fetchone()
+        if t!=None:
+            data = json.loads(t['chat_messages'])
+            if len(data[buyer_mailID]) == 0 and len(data[session['id']]) == 0:
+                msg = 'No messages'
+            return render_template('chat_sell.html',data=data,msg=msg)
+        else:
+            data=[]
+            return render_template('chat_sell.html',data=data,msg=msg)
+            
     
 # @app.route('/dropdown')
 # def dropdown():
@@ -405,4 +500,4 @@ def chat_sell(buyer_mailID):
 
 
 if(__name__=="__main__"):
-    app.run(debug=True)
+    app.run(debug=True, port=8000)
