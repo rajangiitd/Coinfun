@@ -16,14 +16,14 @@ rel="stylesheet" href="{{url_for('static',filename='css/user_profile.css')}}"
       <p>Phone: {{data['contact_number']}}</p>
       <p>Status: {{data['kyc']}}</p>
     </div>
-    <div class="change_photo">
+    <div id="photo_form" class="change_photo">
       {% if data['profile_pic']|length > 0 %}
-        <img src="data:image/png;charset=utf-8;base64,{{ data['profile_pic'] }}" alt="Profile_Pic"
+        <img id="profile_pic" src="data:image/png;charset=utf-8;base64,{{ data['profile_pic'] }}" alt="Profile_Pic"
         style="margin-right: 100px; margin-top: 100px; height: 150px; width: 150px; border-radius: 20px; ">
       {% else %}
-        <img src="{{url_for('static',filename='images/blank.jpg')}}" alt="Profile_Pic" style="margin-right: 100px; margin-top: 100px; height: 150px; width: 150px; border-radius: 20px;">
+        <img id="profile_pic" src="{{url_for('static',filename='images/blank.jpg')}}" alt="Profile_Pic" style="margin-right: 100px; margin-top: 100px; height: 150px; width: 150px; border-radius: 20px;">
       {% endif %}
-      <form action="/upload_pic" method="POST" enctype="multipart/form-data">
+      <form id="upload_pic_form" action="/upload_pic" method="POST" enctype="multipart/form-data">
         <input type="file" name="photo">
         <button type="submit" class="btn btn-success"
           style="font-size: 30px; color: yellow; background-color: black; border-radius: 10px; margin-top: 20px; margin-right: 70px;">Change Photo
@@ -36,6 +36,7 @@ rel="stylesheet" href="{{url_for('static',filename='css/user_profile.css')}}"
 
 
 <script>
+  var profile_pic = document.getElementById("profile_pic");
   var groupButton = document.getElementById("logout");
   if (groupButton) {
     groupButton.addEventListener("click", function (e) {
@@ -64,6 +65,32 @@ rel="stylesheet" href="{{url_for('static',filename='css/user_profile.css')}}"
   if (groupButton2) {
     groupButton2.addEventListener("click", function (e) {
       window.location.href = "/dashboard";
+    });
+  }
+  var photo_form = document.getElementById("photo_form");
+  var uploadForm = document.getElementById("upload_pic_form");
+  if (uploadForm) {
+    uploadForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var formData = new FormData(this);
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", "/upload_pic", true);
+      xhr.onload = function () {
+        if (this.status == 200) {
+          const response = JSON.parse(this.response);
+          console.log(response['profile_pic']);
+          // create new image element and set its src to the base64 string
+          const image = document.createElement("img");
+          image.src = `data:image/png;charset=utf-8;base64,${response['profile_pic']}`;
+          // add image as first child of photo_form
+          photo_form.insertBefore(image, photo_form.firstChild);
+          // remove old image
+          photo_form.removeChild(profile_pic);
+          // profile_pic.src = `data:image/png;charset=utf-8;base64,${response['profile_pic']}`
+          window.location.href = "/user_profile";
+        }
+      };
+      xhr.send(formData);
     });
   }
 </script>

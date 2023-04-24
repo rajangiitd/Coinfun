@@ -27,14 +27,16 @@ rel="stylesheet" href="{{url_for('static',filename='css/order_history.css')}}"
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>{{history['timestamp']}}</td>
-              <td>{{history['order_type']}}</td>
-              <td>{{history['crypto_name']}}</td>
-              <td>{{history['crypto_amount']}}</td>
-              <td>{{history['crypto_price']}}</td>
-              <td>{{history['net_usdt']}}</td>
-            </tr>
+            {% for history in history %}
+              <tr>
+                <td>{{history['timestamp']}}</td>
+                <td>{{history['order_type']}}</td>
+                <td>{{history['crypto_name']}}</td>
+                <td>{{history['crypto_amount']}}</td>
+                <td>{{history['crypto_price']}}</td>
+                <td>{{history['net_usdt']}}</td>
+              </tr>
+            {% endfor %}
           </tbody>
         </table>
       {% else %}

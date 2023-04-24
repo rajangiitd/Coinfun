@@ -134,7 +134,7 @@ def generate_fake_userinfo_p2pbidding_crptotradinghistory_data(num_users):
         
         # Insert the user data into the database
         sql = "INSERT INTO userinfo (email_id, username, password, wallet, favourites, profile_pic, kyc, contact) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-        val = (email_id, username, password, json.dumps(wallet), favourites, read_n_write_image_with_sql.convert_to_writable(profile_pic_path), kyc, contact)
+        val = (email_id, username, password, json.dumps(wallet), favourites, (read_n_write_image_with_sql.convert_to_writable(profile_pic_path)).decode("UTF-8"), kyc, contact)
         mycursor.execute(sql, val)
         mydb.commit()   # userinfo table done 
         
@@ -200,7 +200,7 @@ def generate_chat_object(id1, id2):
     
     messages.append({"sender": second_sender, 
                      "message": None, 
-                     "image": {"name": os.path.basename(image_path), "type": image_type, "data": image_data_b64.decode() },
+                     "image": {"name": os.path.basename(image_path), "type": image_type, "data": image_data_b64.decode('UTF-8') },
                      "timestamp": next_timestamp.isoformat() })
     
     # Third message

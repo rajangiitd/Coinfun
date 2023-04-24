@@ -54,21 +54,21 @@
         {% for data in jsondata %}
         <tr>
           <td>
-            <a href="/trade_page/{{data['symbol']}}/1m"  type="text" >{{data['symbol']}}</a> 
+            <a href="/trade_page/{{data['symbol']}}/1m"  type="text" style="color: yellow;;" >{{data['symbol']}}</a> 
           </td>
-          <td>{{data['last_price']}}</td>
-          <td>{{data['24h_change']}}</td>
-          <td>{{data['24h_low']}}</td>
-          <td>{{data['24h_high']}}</td>
-          <td>{{data['24h_turnover']}}</td>
+          <td style="color:white">{{data['24h_change']}}</td>
+          <td style="color:white">{{data['last_price']}}</td>
+          <td style="color:white">{{data['24h_low']}}</td>
+          <td style="color:white">{{data['24h_high']}}</td>
+          <td style="color:white">{{data['24h_turnover']}}</td>
           {% if data['fav_crypto'] %}
             <td>
               <!-- <button type="button" class="btn btn-outline-success" , style="background-color:rgb(0, 187, 255); font-size: 20px;" onclick="location.href='{{url_for('user_profile')}}'">UnMark Favourite</button> -->
-              <a href="/mark_unfav/{{data['symbol']}}" type="button" autofocus id="mark_unfav" class="btn btn-outline-dark btn-sm mx-1">Mark Unfavourite</a>
+              <a href="/mark_unfav/{{data['symbol']}}" type="button" style="color: skyblue;" autofocus id="mark_unfav" class="btn btn-outline-dark btn-sm mx-1">Mark Unfavourite</a>
             </td>
           {% else %}
             <td>
-              <a href="/mark_fav/{{data['symbol']}}" type="button" autofocus id="mark_fav"  class="btn btn-outline-dark btn-sm mx-1">Mark Favourite</a>
+              <a href="/mark_fav/{{data['symbol']}}" type="button" style="color: skyblue;" autofocus id="mark_fav"  class="btn btn-outline-dark btn-sm mx-1">Mark Favourite</a>
             </td>
           {% endif %}
         
@@ -87,18 +87,23 @@
         <div class="markets-overview">Markets OverView</div>
       </div>
       <div class="all-cryptos-inner" id="groupContainer14" >
-        <div class="rectangle-parent6" >
-          <div class="group-child9" autofocus id="favorites"></div>
+        <div class="rectangle-parent6" autofocus id="favorites" >
+          <div class="group-child9" ></div>
           <img class="image-6-icon" alt="" src="{{url_for('static',filename='images/fav.png')}}" />
-          <div class="favorites">Favorites</div>
+          <!-- <div class="favorites">Favorites</div> -->
+          <a href="/market_fav" type="button" class="favorites" >Favourites</a>
         </div>
       </div>
       <div class="all-cryptos-inner1">
         <div class="rectangle-parent7">
           <div class="group-child10"></div>
-          <div class="all-cryptos1">All Cryptos</div>
+          <!-- <div class="all-cryptos1">All Cryptos</div> -->
+          <a href="/market_allcrypto" type="button" class="all-cryptos1" >All Cryptos</a>
+
         </div>
       </div>
+      <!-- <a href="/market_fav" type="button" class="all-cryptos-inner1" >All Cryptos</a> -->
+
       <b class="coinfun">Coinfun</b>
     </div>
 

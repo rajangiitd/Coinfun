@@ -9,7 +9,8 @@ db = mysql.connector.connect(
     host="localhost",
     user="root",
     password="Teamwork123",
-    database="Coinfun_database"
+    database="Coinfun_database",
+    autocommit=True
 )
 cursor = db.cursor()
 

@@ -83,14 +83,16 @@ rel="stylesheet" href="{{url_for('static',filename='css/btc_graph.css')}}"
     <div class="rectangle-parent8">
       <div class="group-child9"></div>
       <div class="price-24407-container">
-        <!-- <span>Quantity</span><span class="usdt"> 20.00</span> -->
-        <form>
+        <!-- <form method="post" action="/">
           <label for="amount">Enter Quantity</label>
           <input type="number" id="amount" name="amount" required>
-        </form>
+          <button type="submit">Submit</button>
+        </form> -->
+        <input type="number" name="Enter Quantity" id="amount">
       </div>
     </div>
   </div>
+  
   <div class="container">
   <p>
     {% if data['symbol'] == "BTC" %}
@@ -198,7 +200,6 @@ loadGoogleTranslate"></script>
   var groupButton5 = document.getElementById("groupButton5");
   if (groupButton5) {
     groupButton5.addEventListener("click", function (e) {
-
       var amountInput = document.getElementById("amount");
       var amountValue = amountInput.value;
       if (amountValue == "") {

@@ -38,12 +38,12 @@ rel="stylesheet" href="{{url_for('static',filename='css/p2p_sell.css')}}"
     <tbody>
       {% for rows in data %}
       <tr>
-        <td>{{rows['username']}}</td>
-        <td>{{rows['price']}} INR</td>
-        <td>Available: {{rows['transaction_usdt']}} USDT <br> Limit: {{rows['lower_limit']}}-{{rows['upper_limit']}} Rs</td>
-        <td>{{rows['payment_method']}}</td>
+        <td style="color: yellow;">{{rows['username']}}</td>
+        <td style="color: white;">{{rows['price']}} INR</td>
+        <td style="color: white;">Available: {{rows['transaction_usdt']}} USDT <br> Limit: {{rows['lower_limit']}}-{{rows['upper_limit']}} Rs</td>
+        <td style="color: white;">{{rows['payment_method']}}</td>
         <td>
-          <a href="/chat_sell/{{rows['email_id']}}" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: rgb(42, 150, 186);">Sell</button>
+          <a href="/chat_sell/{{rows['email_id']}}" type="button" class="btn btn-outline-dark btn-sm mx-1" style="color: red;">Sell</button>
         </td>
       </tr>
       {% endfor %}

@@ -1,4 +1,4 @@
-from flask import Flask , render_template , request , redirect , url_for , session, send_file
+from flask import Flask , render_template , request , redirect , url_for , session, send_file, jsonify
 # from flask_sqlalchemy import SQLAlchemy
 # from flask_mysqldb import MySQL 
 import mysql.connector
@@ -25,6 +25,7 @@ import os
 import base64
 import io
 from PIL import Image
+from time import sleep
 
 # app=Flask(__name__, static_folder='/frontend/static',template_folder='/frontend/templates')
 
@@ -37,7 +38,8 @@ db = mysql.connector.connect(
     host="localhost",
     user="root",
     password="Teamwork123",
-    database="Coinfun_database"
+    database="Coinfun_database",
+    autocommit=True
 )
 cursor = db.cursor()
 
@@ -219,7 +221,7 @@ def reset_password():
     
 
 @app.route('/market_allcrypto')
-def market():
+def market_allcrypto():
     json_data = []
     # data = []
     msg = ''
@@ -233,22 +235,26 @@ def market():
     
 @app.route('/mark_fav/<string:fav>')
 def mark_fav(fav):
-    fav = "," + fav
-    
-    cursor.execute("UPDATE userinfo SET favourites = CONCAT(favourites, %s) WHERE email_id =%s",(fav,session['id'],))
-    db.commit()
-    return redirect(url_for('market'))
+    cursor.execute('Select favourites from userinfo where email_id = %s',(session['id'],))
+    favourite = cursor.fetchone()[0]
+    favourites_list = favourite.split(",")
+    if fav.strip() not in favourites_list:
+        cursor.execute("UPDATE userinfo SET favourites = CONCAT(favourites, %s) WHERE email_id =%s",(","+fav,session['id'],))
+        db.commit()
+    print(get_fav_crypto_list(session['id']), "list after mark fav is ending")
+    return redirect(url_for('market_allcrypto'))
 
 @app.route('/mark_unfav/<string:fav>')
 def mark_unfav(fav):
     cursor.execute('Select favourites from userinfo where email_id = %s',(session['id'],))
     favourites = (cursor.fetchone()[0]).split(',')
     if fav in favourites:
-        favourites.remove(fav)
-    favourites = ",".join(favourites)
-    cursor.execute("UPDATE userinfo SET favourites = %s WHERE email_id =%s",(favourites,session['id'],))
-    db.commit()
-    return redirect(url_for('market'))
+        favourites = [x for x in favourites if x != fav]
+        favourites = ",".join(favourites)
+        cursor.execute("UPDATE userinfo SET favourites = %s WHERE email_id =%s",(favourites,session['id'],))
+        db.commit()
+    print(get_fav_crypto_list(session['id']), "list after mark unfav is ending")
+    return redirect(url_for('market_allcrypto'))
 
 @app.route('/p2p_buy')
 def p2p():
@@ -302,6 +308,7 @@ def change_password():
         current_pass = request.form['password']
         newpass = request.form['new_password']
         newpass_confirm = request.form['confirm_new_password']
+        print(session['id'],current_pass,newpass,newpass_confirm)
         # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         try:
             msg =  change_pass_help(session['id'],current_pass,newpass,newpass_confirm)
@@ -326,23 +333,20 @@ def market_fav():
 def user_profile():
     data= {}
     msg = ''
-    data = get_user_profile(session['id'])
-    # try:
-    #     data  = get_user_profile(session['id'])
-    #     print(data['username'])
-    #     if data['profile_pic']!="":
-    #         print(data['kyc'])
-    #         data['profile_pic'] = 'data:image/png;base64,' + data['profile_pic'].decode('utf-8')
-    #         print(data['kyc'])
-    # except Exception as e:
-    #     msg = str(e)
-    #     print(msg)
-    return render_template('user_profile.html', data=data,msg=msg)
-    
+    try:
+        data = get_user_profile(session['id'])
+        print(data['profile_pic'][-50:-35])
+        return render_template('user_profile.html', data=data,msg=msg)
+    except Exception as e:
+        msg = str(e)
+        print(msg)
+        return render_template('user_profile.html', data=data,msg=msg)
+    # data['profile_pic'] = 'data:image/png;base64,' + data['profile_pic'].decode('utf-8')
+   
 @app.route('/upload_pic',methods = ['GET','POST'])
 def upload_pic():
     msg = ''
-    
+    cursor = db.cursor()
     if 'id' not in session:
         return redirect(url_for('login'))
     
@@ -355,15 +359,11 @@ def upload_pic():
                     # Read the binary data from the file
                     image_data = photo.read()
                     encoded_data = base64.b64encode(image_data) # Encode the binary data as base64
-                    cursor.execute('UPDATE userinfo SET profile_pic = %s WHERE email_id = %s', (encoded_data, session['id']))
+                    cursor.execute('UPDATE userinfo SET profile_pic = %s WHERE email_id = %s', (encoded_data.decode('UTF-8') , session['id']))
                     db.commit()
 
                     msg = 'IMAGE UPDATED SUCCESSFULLY!'
-                    #user_data['profile_pic_ext'] = os.path.splitext(photo.filename)[-1]
                     # user_data['profile_pic'] = 'data:image/png;base64,' + base64.b64encode(user_data['profile_pic']).decode('utf-8')
-                    #image = 'data:image/'+user_data['profile_pic_ext']+';base64,' + encoded_data.decode('utf-8')
-                    #user_data['profile_pic']= image
-                    print(5)
                 else:
                     msg="Only png , jpg and jpeg format is allowed"
                     # user_data['profile_pic_ext'] = os.path.splitext(photo.filename)[-1]
@@ -371,10 +371,14 @@ def upload_pic():
                     # user_data['profile_pic']= image
                     print(6)
             user_data= get_user_profile(session['id'])
-            return redirect(url_for('user_profile'))
+            print(encoded_data[-50:-35],"here 2")
+            user_data['profile_pic'] = encoded_data.decode("UTF-8")
+            #return redirect(url_for('user_profile'))
             #return render_template('user_profile.html',data= user_data,msg=msg)
+            print(user_data['profile_pic'][-50:-35])
+            return jsonify({'msg':msg, 'profile_pic':user_data['profile_pic']})
         except Exception as e:
-            print(e)
+            print(e, "ERROR COMING HERE")
             msg = 'IMAGE CANNOT BE UPDATED!'
             # if user_data['profile_pic']!="":
                 # user_data['profile_pic'] = 'data:image/png;base64,' + base64.b64encode(user_data['profile_pic']).decode('utf-8')   
@@ -397,7 +401,7 @@ def order_history():
     history = []
     msg = ''
     try:
-        history = get_order_history(session['username'])
+        history = get_order_history(session['id'])
     except Exception as e:
         msg = str(e)
     return render_template('order_history.html',history=history,msg=msg)
@@ -500,4 +504,4 @@ def chat_sell(buyer_mailID):
 
 
 if(__name__=="__main__"):
-    app.run(debug=True, port=18000)
+    app.run(debug=True, port=17000)
