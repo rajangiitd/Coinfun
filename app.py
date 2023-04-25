@@ -26,6 +26,7 @@ import base64
 import io
 from PIL import Image
 from time import sleep
+from flask import make_response
 
 # app=Flask(__name__, static_folder='/frontend/static',template_folder='/frontend/templates')
 
@@ -44,7 +45,8 @@ db = mysql.connector.connect(
 
 @app.route('/')
 def first():
-	return render_template('login.html', msg = '')
+    return render_template('login.html', msg = '')
+
 
 @app.route('/login', methods =['POST'])
 def login():
@@ -146,10 +148,13 @@ def dashboard():
     data = []
     cursor = db.cursor()
     try:
+        print("here 2")
         data= get_wallet_data(session['id'])
-        temp = {}
-        temp['username'] = session['username']
-        data.append(temp)
+        data_ = data['data']
+        data_ = [{**d, 'price': str(round(float(d['price']), 2))} for d in data_]
+        data_ = [{**d, 'amount': str(round(float(d['amount']), 4))} for d in data_]
+        data_ = [{**d, 'est_balance': str(round(float(d['est_balance']), 3))} for d in data_]
+        data['data'] = data_
     except Exception as e:
         msg = str(e)
     cursor.close()
@@ -290,7 +295,7 @@ def mark_unfav(fav):
 
 @app.route('/p2p_buy')
 def p2p():
-    # This is the code for p2p buy 
+    # This is the code for p2p buy page
     list_ = []
     msg = ''
     cursor = db.cursor()
@@ -302,25 +307,10 @@ def p2p():
         msg = str(e)
     cursor.close()
     return render_template('p2p_buy.html',data=list_,msg=msg)
-    
-@app.route('/p2p_add_usdt/<float:balance>')  
-def p2p_add_usdt(balance):
-    cursor = db.cursor()
-    # cursor.execute("SELECT JSON_EXTRACT(wallet, '$.USDT') FROM userinfo WHERE emailid=%s",(session['id'],))
-    cursor.execute('SELECT wallet FROM userinfo WHERE email_id = %s', (session['id'],))
-    wallet = cursor.fetchone()[0]
-    wallet = json.loads(wallet)
-    wallet['USDT']+=balance
-    wallet = json.dumps(wallet)
-    
-    cursor.execute("UPDATE userinfo SET wallet = %s WHERE email_id= %s",(wallet,session['id'],))
-    db.commit()
-    cursor.close()
-    return redirect(url_for('p2p_buy'))
 
 @app.route('/p2p_sell')
 def p2p_sell():
-        # This is the code for p2p buy 
+                # This is the code for p2p sell page
     list_ = []
     msg = ''
     cursor = db.cursor()
@@ -332,14 +322,31 @@ def p2p_sell():
         msg = str(e)
     cursor.close()
     return render_template('p2p_sell.html',data=list_,msg=msg)
+    
+@app.route('/p2p_add_usdt/<float:balance>')  
+def p2p_add_usdt(email_id, balance_to_add):
+    cursor = db.cursor()
+    # cursor.execute("SELECT JSON_EXTRACT(wallet, '$.USDT') FROM userinfo WHERE emailid=%s",(session['id'],))
+    cursor.execute('SELECT wallet FROM userinfo WHERE email_id = %s', (session['id'],))
+    wallet = cursor.fetchone()[0]
+    wallet = json.loads(wallet)
+    wallet['USDT']+=balance_to_add
+    wallet = json.dumps(wallet)
+    cursor.execute("UPDATE userinfo SET wallet = %s WHERE email_id= %s",(wallet,session['id'],))
+    db.commit()
+    cursor.close()
+    return redirect(url_for('p2p_buy'))
+
 
 @app.route('/p2p_deduct_usdt/<float:balance>')  
-def p2p_deduct_usdt(balance):
+def p2p_deduct_usdt(email_id, balance_to_deduct):
     cursor = db.cursor()
     cursor.execute('SELECT wallet FROM userinfo WHERE email_id = %s', (session['id'],))
     wallet = cursor.fetchone()[0]
     wallet = json.loads(wallet)
-    wallet['USDT']-=balance
+    if(balance_to_deduct > wallet['USDT']):
+        raise Exception("Your amount entered exceeds the order amount!")
+    wallet['USDT']-=balance_to_deduct
     wallet = json.dumps(wallet)
     cursor.execute("UPDATE userinfo SET wallet = %s WHERE email_id= %s",(wallet,session['id'],))
     db.commit()

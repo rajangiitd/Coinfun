@@ -1,4 +1,4 @@
-p.container{
+p.paragraph-xyz-crypto{
   position: absolute;
   width: 100%;
   height: fix-content;
@@ -253,11 +253,10 @@ p.container{
 }
 .image-14-icon {
   position: absolute;
-  top: 456px;
-  left: 136px;
-  width: 767px;
-  height: 281px;
   object-fit: cover;
+  transform: scale(0.6) translate(-370px, 400px);
+  z-index: -5;
+
 }
 .group-child6 {
   position: absolute;
@@ -430,4 +429,13 @@ p.container{
   font-family: var(--font-roboto);
 }
 
+.transform-rigth{
+  transform: translate(850px, -300px);
+}
 
+.trading-button-container{
+  display: flex;
+  flex-direction: column;
+  transform: translate(-170px, 80px);
+  width: 140px;
+}

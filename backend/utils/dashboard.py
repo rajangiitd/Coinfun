@@ -12,10 +12,9 @@ db = mysql.connector.connect(
     autocommit=True
 )
 
-cursor = db.cursor()
-
 def get_wallet_data(email_id):
     try:
+        cursor = db.cursor()
         cursor.execute('SELECT wallet FROM userinfo where email_id=%s',(email_id,))
         wallet = cursor.fetchone()[0]
         wallet = json.loads(wallet) # Typecast string to dictionary
@@ -39,10 +38,12 @@ def get_wallet_data(email_id):
             temp['price'] = item['last_price']
             temp['est_balance'] = temp['price']*temp['amount']     
             total_balance += temp['est_balance']
-            list_.append(temp)  
-            # data['wallet'].append(temp) # Append temp directly without curly braces
+            list_.append(temp)
+        list_.append({'symbol':'USDT', 'amount': wallet['USDT'] , 'price' : '1' , 'est_balance': wallet['USDT']})
+        list_.append({'symbol':'USDT(queued in P2P order)', 'amount': wallet['USDT_in_bid'] , 'price' : '1' , 'est_balance': wallet['USDT_in_bid']})
         dict_['data'] = list_ 
-        dict_['estimated_balance'] = total_balance
+        dict_['estimated_balance'] = round(total_balance,3)
+        cursor.close()
         return dict_
     except:
         db.rollback()

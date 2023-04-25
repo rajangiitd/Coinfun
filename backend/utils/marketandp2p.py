@@ -78,6 +78,9 @@ def get_p2p_buy_page_data():
         data_ = list([dict(zip(keys, row)) for row in rows])
         for dict_ in data_:
             dict_['username'] = get_user_profile(dict_["email_id"])['username']
+        data_ = [{**d, 'price': round(d['price'], 2)} for d in data_]
+        data_ = [{**d, 'lower_limit': round(d['lower_limit'], 2)} for d in data_]
+        data_ = [{**d, 'upper_limit': round(d['upper_limit'], 2)} for d in data_]
         return data_
     except:
         db.rollback()
@@ -91,6 +94,9 @@ def get_p2p_sell_page_data():
         data_ = list([dict(zip(keys, row)) for row in rows])
         for dict_ in data_:
             dict_['username'] = get_user_profile(dict_["email_id"])['username']
+        data_ = [{**d, 'price': round(d['price'], 2)} for d in data_]
+        data_ = [{**d, 'lower_limit': round(d['lower_limit'], 2)} for d in data_]
+        data_ = [{**d, 'upper_limit': round(d['upper_limit'], 2)} for d in data_]
         return data_
     except:
         db.rollback()

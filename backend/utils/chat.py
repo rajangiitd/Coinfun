@@ -9,9 +9,9 @@ db = mysql.connector.connect(
     autocommit=True
 )
 
-cursor = db.cursor()
 
 def update_chat_txt(sender_email, emailID1, emailID2, message):
+    cursor = db.cursor()
     try:
         if (emailID1 > emailID2):
             emailID1,emailID2 = emailID2,emailID1
@@ -37,14 +37,18 @@ def update_chat_txt(sender_email, emailID1, emailID2, message):
         t = json.dumps(t)
         cursor.execute("UPDATE chat SET chat_messages = %s WHERE email_id1 = %s AND email_id2 = %s", (t, emailID1,emailID2))
         db.commit()
+        cursor.close()
         return "Chat messages updated successfully!"
-    except:
+    except mysql.connector.Error as e:
         db.rollback()
+        raise Exception("Chat Messages Coudn't be updated!")
+    except:
         raise Exception("Chat Messages Coudn't be updated!")
 
 
 
 def update_chat_image(sender_email,emailID1,emailID2,photo):
+    cursor = db.cursor()
     try:
         if (emailID1 > emailID2):
             emailID1,emailID2 = emailID2,emailID1
@@ -73,6 +77,8 @@ def update_chat_image(sender_email,emailID1,emailID2,photo):
         cursor.execute("UPDATE chat SET chat_messages = %s WHERE email_id1 = %s AND email_id2 = %s", (t, emailID1,emailID2))
         db.commit()
         return "Chat messages updated successfully!"
-    except:
+    except mysql.connector.Error as e:
         db.rollback()
+        raise Exception("Chat Messages Coudn't be updated!")
+    except:
         raise Exception("Chat Messages Coudn't be updated!")

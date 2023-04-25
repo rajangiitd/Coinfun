@@ -54,24 +54,27 @@ rel="stylesheet" href="{{url_for('static',filename='css/btc_graph.css')}}"
   <b class="coinfun">Coinfun</b>
   <img class="image-14-icon" alt="Graph" src="data:image/jpg;charset=utf-8;base64,{{ image }}" />
   <div class="btc-graph-inner4">
-    <button class="rectangle-parent5">
       <div class="group-child6"></div>
-      <div class="m-15-m">1 Min Changes</div>
-    </button>
+      <div class="m-15-m trading-button-container">
+        <button type="button" class="btn btn-primary trading-button">1 Min Changes</button>
+        <button type="button" class="btn btn-primary trading-button">5 Min Changes</button>
+        <button type="button" class="btn btn-primary trading-button">10 Min Changes</button>
+        <button type="button" class="btn btn-primary trading-button">1 Hour Changes</button>
+      </div>
   </div>
-  <div class="btc-graph-inner5">
+  <div class="btc-graph-inner5 transform-rigth">
     <button class="rectangle-parent6" id="groupButton5">
       <div class="group-child7"></div>
       <div class="buy-btc">Buy {{data['symbol']}}</div>
     </button>
   </div>
-  <div class="btc-graph-inner6">
+  <div class="btc-graph-inner6 transform-rigth">
     <button class="rectangle-parent7" id="sell">
       <div class="group-child8"></div>
       <div class="sell-btc">Sell {{data['symbol']}}</div>
     </button>
   </div>
-  <div class="btc-graph-inner7">
+  <div class="btc-graph-inner7 transform-rigth">
     <div class="rectangle-parent8">
       <div class="group-child9"></div>
       <div class="price-24407-container">
@@ -79,7 +82,7 @@ rel="stylesheet" href="{{url_for('static',filename='css/btc_graph.css')}}"
       </div>
     </div>
   </div>
-  <div class="btc-graph-inner8">
+  <div class="btc-graph-inner8 transform-rigth">
     <div class="rectangle-parent8">
       <div class="group-child9"></div>
       <div class="price-24407-container">
@@ -88,11 +91,11 @@ rel="stylesheet" href="{{url_for('static',filename='css/btc_graph.css')}}"
           <input type="number" id="amount" name="amount" required>
           <button type="submit">Submit</button>
         </form> -->
-        <input type="number" name="Enter Quantity" id="amount" disabled="false">
+        <input type="number" name="Enter Quantity" id="amount" >
       </div>
     </div>
   </div>
-  <p class="container">
+  <p class="paragraph-xyz-crypto">
       {% if data['symbol'] == "BTC" %}
         About Bitcoin (BTC) <br>
         Bitcoin is one of the most popular cryptocurrencies in the market. First introduced in 2009 by Satoshi Nakamoto, Bitcoin has held the crypto market’s number one spot according to market capitalization. Bitcoin paved the way for many existing altcoins in the market and marked a pivotal moment for digital payment solutions.  
