@@ -26,6 +26,7 @@ def get_fav_crypto_list(email_id):
         favourite_crypto_list = t[0].split(",")
         return favourite_crypto_list    # returns a list of strings
     except Exception as e:
+        db.rollback()
         raise e
 
 def get_market_data(email_id= None, filename='market_data.json'):   # returns a list of dictionaries containing market data
@@ -76,7 +77,8 @@ def get_p2p_buy_page_data():
         for dict_ in data_:
             dict_['username'] = get_user_profile(dict_["email_id"])['username']
         return data_
-    except: 
+    except:
+        db.rollback()
         raise Exception('Sorry! Bidding details for Buying page could not be fetched !')
 
 def get_p2p_sell_page_data():
@@ -89,6 +91,7 @@ def get_p2p_sell_page_data():
             dict_['username'] = get_user_profile(dict_["email_id"])['username']
         return data_
     except:
+        db.rollback()
         raise Exception('Sorry! Bidding details for Selling page could not be fetched!')
 
 def form_graph(crypto, time_frame, horizontal_size=16, vertical_size=8):
@@ -143,6 +146,7 @@ def form_graph(crypto, time_frame, horizontal_size=16, vertical_size=8):
         plt.close()
         return ( base64_image, crypto_details) # image is a base64 string, crypto_details is a dictionary
     except Exception as e:
+        db.rollback()
         raise e
     
 # print(get_market_data("person1@gmail.com"))

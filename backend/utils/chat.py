@@ -39,6 +39,7 @@ def update_chat_txt(sender_email, emailID1, emailID2, message):
         db.commit()
         return "Chat messages updated successfully!"
     except:
+        db.rollback()
         raise Exception("Chat Messages Coudn't be updated!")
 
 
@@ -73,4 +74,5 @@ def update_chat_image(sender_email,emailID1,emailID2,photo):
         db.commit()
         return "Chat messages updated successfully!"
     except:
+        db.rollback()
         raise Exception("Chat Messages Coudn't be updated!")

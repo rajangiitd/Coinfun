@@ -30,6 +30,7 @@ def get_user_profile(email):
         data['contact_number'] = details[7]
         return data
     except:
+        db.rollback()
         raise Exception("Couldn't fetch user profile data")
 
 
@@ -55,5 +56,6 @@ def change_pass_help(email, current_pass, new_pass, new_pass_confirm):
             cursor.execute('UPDATE userinfo SET password =%s WHERE email_id =%s',(new_encrypted_pass,email,))
             return 'PASSWORD UPDATED SUCCESSFULLY'
     except Exception as e:
+        db.rollback()
         raise e
 

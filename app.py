@@ -314,6 +314,7 @@ def change_password():
             msg =  change_pass_help(session['id'],current_pass,newpass,newpass_confirm)
         except Exception as e:
             msg = str(e)
+        print(msg)
     elif request.method == 'POST':
         msg = 'Please fill in all the blanks provided'
     return render_template('changepassword.html',msg=msg)
@@ -504,4 +505,4 @@ def chat_sell(buyer_mailID):
 
 
 if(__name__=="__main__"):
-    app.run(debug=True, port=17000)
+    app.run(debug=True, port=17001)

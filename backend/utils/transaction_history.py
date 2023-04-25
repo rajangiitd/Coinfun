@@ -51,6 +51,7 @@ def get_transaction_history_data(email_id): # returns a list of dictionaries con
             transaction_history.append(temp)
         return transaction_history
     except Exception as e:
+        db.rollback()
         raise e
 
 #print(get_transaction_history_data("person1@gmail.com"))

@@ -45,6 +45,7 @@ def get_wallet_data(email_id):
         dict_['estimated_balance'] = total_balance
         return dict_
     except:
+        db.rollback()
         raise Exception("Couldn't fetch wallet data")
 
 #print(get_wallet_data("person1@gmail.com"))
