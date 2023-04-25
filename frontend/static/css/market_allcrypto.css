@@ -563,7 +563,11 @@
 .favorites,
 .image-6-icon {
   position: absolute;
-  top: 11px;
+  top: 12px;
+  left: 14px;
+  font-weight: 900;
+  /* position: absolute;
+  top: 11px; */
 }
 .image-6-icon {
   left: 21px;

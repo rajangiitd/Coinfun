@@ -64,11 +64,11 @@
           {% if data['fav_crypto'] %}
             <td>
               <!-- <button type="button" class="btn btn-outline-success" , style="background-color:rgb(0, 187, 255); font-size: 20px;" onclick="location.href='{{url_for('user_profile')}}'">UnMark Favourite</button> -->
-              <a href="/mark_unfav/{{data['symbol']}}" type="button" style="color: skyblue;" autofocus id="mark_unfav" class="btn btn-outline-dark btn-sm mx-1">Mark Unfavourite</a>
+              <a href="/mark_unfav/{{data['symbol']}}" type="button" style="color: skyblue;"  class="btn btn-outline-dark btn-sm mx-1">Mark Unfavourite</a>
             </td>
           {% else %}
             <td>
-              <a href="/mark_fav/{{data['symbol']}}" type="button" style="color: skyblue;" autofocus id="mark_fav"  class="btn btn-outline-dark btn-sm mx-1">Mark Favourite</a>
+              <a href="/mark_fav/{{data['symbol']}}" type="button" style="color: skyblue;"   class="btn btn-outline-dark btn-sm mx-1">Mark Favourite</a>
             </td>
           {% endif %}
         
@@ -86,10 +86,10 @@
         <div class="group-child8"></div>
         <div class="markets-overview">Markets OverView</div>
       </div>
-      <div class="all-cryptos-inner" id="groupContainer14" >
-        <div class="rectangle-parent6" autofocus id="favorites" >
+      <div class="all-cryptos-inner" id="favorites" >
+        <div class="rectangle-parent6">
           <div class="group-child9" ></div>
-          <img class="image-6-icon" alt="" src="{{url_for('static',filename='images/fav.png')}}" />
+          <img class="image-6-icon" alt="" src="{{url_for('static',filename='images/non_fav.png')}}" />
           <!-- <div class="favorites">Favorites</div> -->
           <a href="/market_fav" type="button" class="favorites" >Favourites</a>
         </div>
@@ -141,24 +141,8 @@
           // Please sync "Favourites" to the project
         });
       }
-      var btn = document.getElementById("mark_unfav");
-      if (btn) {
-        btn.addEventListener("click", function (e) {
-          e.preventDefault(); // Prevent the button from reloading
-          btn.innerText = "Mark Favourite";
-          console.log("Button clicked!"); // Check if the code is executed
-        });
-      }
-
-      var btn1 = document.getElementById("mark_fav");
-      if (btn1) {
-        btn1.addEventListener("click", function (e) {
-          e.preventDefault(); // Prevent the button from reloading
-          btn1.innerText= "Mark UnFavourite";
-          console.log("Button clicked!"); // Check if the code is executed
-          // Please sync "Favourites" to the project
-        });
-      }
+     
+      
       </script>
   </body>
 </html>

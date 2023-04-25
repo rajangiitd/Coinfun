@@ -79,7 +79,7 @@ def register():
         if request.method == 'POST' and 'username' in request.form and 'email' in request.form and 'password' in request.form and 'confirm-password' in request.form and 'phone-number' in request.form:
             username = request.form['username']
             password = request.form['password']
-            email = request.form['email']
+            email_id = request.form['email']
             confirm_password=request.form['confirm-password']
             phone_number = request.form['phone-number']
             # profile_pic = request.files['profile_pic']
@@ -95,23 +95,28 @@ def register():
             #pic = convert_to_writable(file_path)
             pic = ""
             # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute('SELECT * FROM userinfo WHERE email_id = %s', (email,))
+            cursor.execute('SELECT * FROM userinfo WHERE email_id = %s', (email_id,))
             user = cursor.fetchone()
             if (user != None):
                 msg = 'Account already exists !'
-            elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
+            elif not re.match(r'[^@]+@[^@]+\.[^@]+', email_id):
                 msg = 'Invalid email address !'
             elif not re.match(r'[A-Za-z0-9]+', username):
                 msg = 'Username must contain only characters and numbers !'
             elif password!=confirm_password:
-                msg = 'Password and confirm-Password must be same'
+                raise Exception("Your password does not matches the confirm password !")
             elif is_password_valid(password) == False:
-                msg = 'Password must contains letters and numbers both'
+                raise Exception("Please enter a valid password, it should contain atleast 1 capital and 1 small alphabets and atleast 1 digit with length between 8-25")
             else:
-                cursor.execute('INSERT INTO userinfo VALUES ( %s, %s, %s, "{"ADA": 0.0, "BNB": 0.0, "BTC": 0.0, "ETH": 0.0, "SOL":  0.0, "XRP": 0.0, "DOGE": 0.0, "USDT": 0.0, "MATIC": 0.0, "USDT_in_bid": 0.0}", "", % s, false,%s)', (email,username, encrypt_password(password),pic,phone_number, ))
-                # mysql.connection.commit()
+                # prepare the SQL query
+                sql = "INSERT INTO userinfo (email_id, username, password, wallet, favourites, profile_pic, kyc, contact) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+                values = (email_id, username, encrypt_password(password), '{"ADA": 0.0, "BNB": 0.0, "BTC": 0.0, "ETH": 0.0, "SOL":  0.0, "XRP": 0.0, "DOGE": 0.0, "USDT": 0.0, "MATIC": 0.0, "USDT_in_bid": 0.0}', "", "" , False, phone_number)
+                cursor.execute(sql, values)
                 db.commit()
-                cursor.execute('SELECT email_id, username FROM userinfo WHERE email_id = %s', (email,))
+                #cursor.execute('INSERT INTO userinfo VALUES ( %s, %s, %s, "{"ADA": 0.0, "BNB": 0.0, "BTC": 0.0, "ETH": 0.0, "SOL":  0.0, "XRP": 0.0, "DOGE": 0.0, "USDT": 0.0, "MATIC": 0.0, "USDT_in_bid": 0.0}", "", % s, false,%s)', (email,username, encrypt_password(password),pic,phone_number, ))
+                # mysql.connection.commit()
+
+                cursor.execute('SELECT email_id, username FROM userinfo WHERE email_id = %s', (email_id,))
                 result = cursor.fetchone()
                 user_id = result[0]
                 username = result[1]
@@ -286,15 +291,17 @@ def mark_unfav(fav):
 @app.route('/p2p_buy')
 def p2p():
     # This is the code for p2p buy 
-    list = []
+    list_ = []
     msg = ''
     cursor = db.cursor()
     try:
-        list = get_p2p_buy_page_data()
+        list_ = get_p2p_buy_page_data()
+        list_ = sorted(list_, key=lambda x: x['price'])
+        print(list_)
     except Exception as e:
         msg = str(e)
     cursor.close()
-    return render_template('p2p_buy.html',data=list,msg=msg)
+    return render_template('p2p_buy.html',data=list_,msg=msg)
     
 @app.route('/p2p_add_usdt/<float:balance>')  
 def p2p_add_usdt(balance):
@@ -314,15 +321,17 @@ def p2p_add_usdt(balance):
 @app.route('/p2p_sell')
 def p2p_sell():
         # This is the code for p2p buy 
-    list = []
+    list_ = []
     msg = ''
     cursor = db.cursor()
     try:
-        list = get_p2p_sell_page_data()
+        list_ = get_p2p_sell_page_data()
+        list_ = sorted(list_, key=lambda x: -x['price'])
+        print(list_)
     except Exception as e:
         msg = str(e)
     cursor.close()
-    return render_template('p2p_sell.html',data=list,msg=msg)
+    return render_template('p2p_sell.html',data=list_,msg=msg)
 
 @app.route('/p2p_deduct_usdt/<float:balance>')  
 def p2p_deduct_usdt(balance):
@@ -432,7 +441,6 @@ def upload_pic():
             return render_template('user_profile.html',data=user_data,msg=msg)
     else:
         print(8)
-        print("LAG GYE")
         try:
             cursor.execute('SELECT profile_pic from userinfo where email_id=%s',(session['id']))
             image = cursor.fetchone()[0]
