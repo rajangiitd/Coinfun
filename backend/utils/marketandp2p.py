@@ -17,18 +17,21 @@ db = mysql.connector.connect(
     database="Coinfun_database",
     autocommit=True
 )
-cursor = db.cursor()
 
 def get_fav_crypto_list(email_id):
     try: 
+        cursor = db.cursor()
         cursor.execute('SELECT favourites from userinfo where email_id=%s',(email_id,))
         t = cursor.fetchone()
         if(t==None or t[0]==None or t[0]==""):
             raise Exception("You do not have any favourite crypto currencies!")
         favourite_crypto_list = t[0].split(",")
+        cursor.close()
         return favourite_crypto_list    # returns a list of strings
-    except Exception as e:
+    except mysql.connector.Error as e:
         db.rollback()
+        raise e
+    except Exception as e:
         raise e
 
 def get_market_data(email_id= None, filename='market_data.json'):   # returns a list of dictionaries containing market data
@@ -55,7 +58,11 @@ def get_market_data(email_id= None, filename='market_data.json'):   # returns a 
             return market_data
     except Exception as e:
         if(str(e)=="You do not have any favourite crypto currencies!"):
-            raise e
+            #raise e
+            for item in market_data:
+                item['symbol'] = (item['symbol'].split("/"))[0]
+                item['fav_crypto'] = False
+            return market_data
         else:
             raise Exception('Market data could not be fetched!')
 
@@ -72,6 +79,7 @@ def get_fav_page_data(email_id):
 
 def get_p2p_buy_page_data():
     try:
+        cursor = db.cursor()
         cursor.execute('SELECT * FROM P2PBiddingData where buy_type = false')
         rows = cursor.fetchall()
         keys = ('email_id', 'buy_type', 'transaction_usdt', 'price', 'payment_method', 'lower_limit', 'upper_limit')
@@ -81,13 +89,17 @@ def get_p2p_buy_page_data():
         data_ = [{**d, 'price': round(d['price'], 2)} for d in data_]
         data_ = [{**d, 'lower_limit': round(d['lower_limit'], 2)} for d in data_]
         data_ = [{**d, 'upper_limit': round(d['upper_limit'], 2)} for d in data_]
+        cursor.close()
         return data_
-    except:
+    except mysql.connector.Error as e:
         db.rollback()
+        raise Exception('Sorry! Bidding details for Buying page could not be fetched !')
+    except:
         raise Exception('Sorry! Bidding details for Buying page could not be fetched !')
 
 def get_p2p_sell_page_data():
     try:
+        cursor = db.cursor()
         cursor.execute('SELECT * FROM P2PBiddingData where buy_type = True')
         rows = cursor.fetchall()
         keys = ('email_id', 'buy_type', 'transaction_usdt', 'price', 'payment_method', 'lower_limit', 'upper_limit')
@@ -97,9 +109,12 @@ def get_p2p_sell_page_data():
         data_ = [{**d, 'price': round(d['price'], 2)} for d in data_]
         data_ = [{**d, 'lower_limit': round(d['lower_limit'], 2)} for d in data_]
         data_ = [{**d, 'upper_limit': round(d['upper_limit'], 2)} for d in data_]
+        cursor.close()
         return data_
-    except:
+    except mysql.connector.Error as e:
         db.rollback()
+        raise Exception('Sorry! Bidding details for Selling page could not be fetched!')
+    except:
         raise Exception('Sorry! Bidding details for Selling page could not be fetched!')
 
 def form_graph(crypto, time_frame, horizontal_size=16, vertical_size=8):
@@ -154,7 +169,6 @@ def form_graph(crypto, time_frame, horizontal_size=16, vertical_size=8):
         plt.close()
         return ( base64_image, crypto_details) # image is a base64 string, crypto_details is a dictionary
     except Exception as e:
-        db.rollback()
         raise e
     
 # print(get_market_data("person1@gmail.com"))

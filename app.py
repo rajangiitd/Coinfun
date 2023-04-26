@@ -283,17 +283,22 @@ def mark_fav(fav):
 
 @app.route('/mark_unfav/<string:fav>')
 def mark_unfav(fav):
-    cursor = db.cursor()
-    cursor.execute('Select favourites from userinfo where email_id = %s',(session['id'],))
-    favourites = (cursor.fetchone()[0]).split(',')
-    if fav in favourites:
-        favourites = [x for x in favourites if x != fav]
-        favourites = ",".join(favourites)
-        cursor.execute("UPDATE userinfo SET favourites = %s WHERE email_id =%s",(favourites,session['id'],))
-        db.commit()
-    print(get_fav_crypto_list(session['id']), "list after mark unfav is ending")
-    cursor.close()
-    return redirect(url_for('market_allcrypto'))
+    try:
+        cursor = db.cursor()
+        cursor.execute('Select favourites from userinfo where email_id = %s',(session['id'],))
+        favourites = (cursor.fetchone()[0]).split(',')
+        if fav in favourites:
+            favourites = [x for x in favourites if x != fav]
+            favourites = ",".join(favourites)
+            cursor.execute("UPDATE userinfo SET favourites = %s WHERE email_id =%s",(favourites,session['id'],))
+            db.commit()
+        #print(get_fav_crypto_list(session['id']), "list after mark unfav is ending")
+        cursor.close()
+        return redirect(url_for('market_allcrypto'))
+    except Exception as e:
+        msg = str(e)
+        return redirect(url_for('market_allcrypto'))
+        
 
 @app.route('/p2p_buy')
 def p2p():
@@ -384,6 +389,7 @@ def market_fav():
         fav_details = get_fav_page_data(session['id'])
     except Exception as e:
         msg = str(e)
+    print(msg)
     cursor.close()
     return render_template('market_fav.html',jsondata=fav_details,msg=msg)
 

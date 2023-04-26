@@ -16,22 +16,27 @@ db = mysql.connector.connect(
     autocommit=True
 )
 
-cursor = db.cursor()
-
 def add_order(email_id,crypto,last_price,crypto_amount,order_type): #order_type = BUY/SELL
+    cursor = db.cursor()
     try:
         cursor.execute('INSERT INTO CryptoTradingHistoryData VALUES(%s,%s,%s,%s,%s,%s)',(email_id,crypto,last_price,order_type,crypto_amount,datetime.datetime.now(),))
         db.commit()
+        cursor.close()
         return "Order Successful!"
+    except mysql.connector.Error as e:
+        db.rollback()
+        raise Exception('Could not add order details to user\'s order history')
     except:
         raise Exception('Could not add order details to user\'s order history')
 
 def get_order_history(email_ID):
+    cursor = db.cursor()
     try:
         history = []
         cursor.execute('SELECT * from CryptoTradingHistoryData where email_id=%s',(email_ID,))
         data = cursor.fetchall()
         if len(data) == 0:
+            cursor.close()
             raise Exception('You do not have any orders till now. Enter the market to place your orders!')
         else:
             for row in data:
@@ -43,11 +48,16 @@ def get_order_history(email_ID):
                 temp['timestamp'] = time_convertor_to_str(row[5])
                 temp['net_usdt'] = temp['crypto_price']*temp['crypto_amount']
                 history.append(temp)
+        cursor.close()
         return history
+    except mysql.connector.Error as e:
+        db.rollback()
+        raise e
     except Exception as e:
         raise e
 
 def change_wallet(email_id, order_type, crypto , usdt_qty):
+    cursor = db.cursor()
     try:
         market_data = get_market_data()
         
@@ -76,6 +86,10 @@ def change_wallet(email_id, order_type, crypto , usdt_qty):
             wallet = json.dumps(wallet)
             cursor.execute('UPDATE userinfo SET wallet=%s where email_id=%s', (wallet, email_id,))
         db.commit()
+        cursor.close()
         return "Wallet Updated Successfully!"
+    except mysql.connector.Error as e:
+        db.rollback()
+        raise e
     except Exception as e:
         raise e

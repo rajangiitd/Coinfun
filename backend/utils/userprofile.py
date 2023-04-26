@@ -11,9 +11,8 @@ db = mysql.connector.connect(
     autocommit=True
 )
 
-cursor = db.cursor()
-
 def get_user_profile(email):
+    cursor = db.cursor()
     try:
         data = {}
         data['email_id'] = email 
@@ -28,9 +27,12 @@ def get_user_profile(email):
             data['profile_pic'] = ""
         data['kyc'] = details[6]
         data['contact_number'] = details[7]
+        cursor.close()
         return data
-    except:
+    except mysql.connector.Error as e:
         db.rollback()
+        raise Exception("Couldn't fetch user profile data")
+    except:
         raise Exception("Couldn't fetch user profile data")
 
 
@@ -45,17 +47,21 @@ def change_pass_help(email, current_pass, new_pass, new_pass_confirm):
             password_encrypt_for_validation = encrypt_password(current_pass)
         except:
             raise Exception('The current entered password does not matches the exisiting password')
-
+        cursor = db.cursor()
         cursor.execute('SELECT password from userinfo where email_id=%s',(email,))
         current_encrypted_pass = cursor.fetchone()[0]
         
         if(current_encrypted_pass!= password_encrypt_for_validation):
+            cursor.close()
             raise Exception('The current entered password does not matches the exisiting password')
         else:
             new_encrypted_pass = encrypt_password(new_pass)
             cursor.execute('UPDATE userinfo SET password =%s WHERE email_id =%s',(new_encrypted_pass,email,))
+            cursor.close()
             return 'PASSWORD UPDATED SUCCESSFULLY'
-    except Exception as e:
+    except mysql.connector.Error as e:
         db.rollback()
+        raise e
+    except Exception as e:
         raise e
 

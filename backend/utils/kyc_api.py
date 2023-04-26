@@ -9,18 +9,23 @@ db = mysql.connector.connect(
     password="Teamwork123",
     database="Coinfun_database"
 )
-cursor = db.cursor()
 
 def get_kyc_status(email_id):
     try:
+        cursor = db.cursor()
         cursor.execute('SELECT kyc FROM userinfo WHERE email_id = %s', (email_id,))
         kyc = cursor.fetchone()[0]
+        cursor.close()
         return kyc
+    except mysql.connector.Error as e:
+        db.rollback()
+        raise Exception("Couldn't fetch KYC status")
     except:
         raise Exception("Couldn't fetch KYC status")
 
 def approve_kyc_status(email_id):
     try:
+        cursor = db.cursor()
         # Check if email_id exists in the userinfo table
         cursor.execute('SELECT email_id FROM userinfo WHERE email_id=%s', (email_id,))
         result = cursor.fetchone()
@@ -29,9 +34,12 @@ def approve_kyc_status(email_id):
         
         cursor.execute('UPDATE userinfo SET kyc = %s WHERE email_id = %s', (True, email_id))
         db.commit()
+        cursor.close()
         return True    # for successful approval of KYC
-    except Exception as e:
+    except mysql.connector.Error as e:
         db.rollback()
+        raise e
+    except Exception as e:
         raise e
 
 # Command to run in terminal if API doesn't work
