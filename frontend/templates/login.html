@@ -30,12 +30,14 @@
     <script>
         function showMessage(message, duration) {
 		var messageElement = document.getElementById("msg");
-		messageElement.innerHTML = message;
-		messageElement.style.display = "block";
-		setTimeout(function() {
-			messageElement.style.display = "none";
-		}, duration);
-		}
+        if(messageElement!=null){
+            messageElement.innerHTML = message;
+            messageElement.style.display = "block";
+            setTimeout(function() {
+                messageElement.style.display = "none";
+            }, duration);
+        }
+        }
 		var message = "{{msg}}";
 		showMessage(message, 5000);
     </script>

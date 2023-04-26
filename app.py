@@ -263,7 +263,9 @@ def market_allcrypto():
         # data = get_fav_crypto_list(session['id'])
     except Exception as e:
         msg = str(e)
+        print(e)
     cursor.close()
+    print(json_data)
     return render_template('market_allcrypto.html',jsondata=json_data,msg=msg)
     
 @app.route('/mark_fav/<string:fav>')
@@ -437,6 +439,7 @@ def upload_pic():
             #return render_template('user_profile.html',data= user_data,msg=msg)
             print(user_data['profile_pic'][-50:-35])
             cursor.close()
+            print(msg)
             return jsonify({'msg':msg, 'profile_pic':user_data['profile_pic']})
         except Exception as e:
             print(e, "ERROR COMING HERE")

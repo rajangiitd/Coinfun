@@ -13,7 +13,7 @@ rel="stylesheet" href="{{url_for('static',filename='css/btc_graph.css')}}"
  
   <div class="group-div">
     <div class="group-child1"></div>
-    <div class="btcusdt">{{data['symbol']}}/USDT</div>
+    <div class="btcusdt">{{data['symbol']}} /USDT</div>
   </div>
   <div class="btc-graph-inner">
     <div class="rectangle-parent1">
@@ -56,10 +56,10 @@ rel="stylesheet" href="{{url_for('static',filename='css/btc_graph.css')}}"
   <div class="btc-graph-inner4">
       <div class="group-child6"></div>
       <div class="m-15-m trading-button-container">
-        <button type="button" class="btn btn-primary trading-button">1 Min Changes</button>
-        <button type="button" class="btn btn-primary trading-button">5 Min Changes</button>
-        <button type="button" class="btn btn-primary trading-button">10 Min Changes</button>
-        <button type="button" class="btn btn-primary trading-button">1 Hour Changes</button>
+        <button type="button" class="btn btn-primary trading-button" onclick="window.location.href= '/trade_page/{{data['symbol']}}/1m' ;">1 Min Chart</button>
+        <button type="button" class="btn btn-primary trading-button" onclick="window.location.href= '/trade_page/{{data['symbol']}}/15m' ;">15 Min Chart</button>
+        <button type="button" class="btn btn-primary trading-button" onclick="window.location.href= '/trade_page/{{data['symbol']}}/1h' ;">1 Hour Chart</button>
+        <button type="button" class="btn btn-primary trading-button" onclick="window.location.href= '/trade_page/{{data['symbol']}}/1d' ;">1 Day Chart</button>
       </div>
   </div>
   <div class="btc-graph-inner5 transform-rigth">
