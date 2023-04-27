@@ -93,3 +93,6 @@ def change_wallet(email_id, order_type, crypto , usdt_qty):
         raise e
     except Exception as e:
         raise e
+    
+
+            

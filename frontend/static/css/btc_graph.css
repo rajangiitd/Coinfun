@@ -258,6 +258,12 @@ p.paragraph-xyz-crypto{
   z-index: -5;
 
 }
+.refresh-img{
+  position: absolute;
+  transform: scale(0.1);
+  top: 50px;
+  left: 1000px;
+}
 .group-child6 {
   position: absolute;
   top: 0;
@@ -304,7 +310,7 @@ p.paragraph-xyz-crypto{
   left: 0;
   border-radius: var(--br-base);
   background-color: #00b332;
-  width: 112px;
+  width: 162px;
   height: 46px;
 }
 .buy-btc {
@@ -315,11 +321,12 @@ p.paragraph-xyz-crypto{
   font-weight: 900;
   font-family: var(--font-roboto);
   color: var(--color-black);
-  text-align: left;
+  text-align: center;
   display: inline-block;
-  width: 88px;
+  width: 142px;
   height: 36.14px;
 }
+
 .rectangle-parent6 {
   cursor: pointer;
   border: 0;
@@ -336,7 +343,7 @@ p.paragraph-xyz-crypto{
   position: absolute;
   top: 731px;
   left: 519px;
-  width: 112px;
+  width: 162px;
   height: 46.14px;
 }
 .group-child8 {
@@ -357,7 +364,7 @@ p.paragraph-xyz-crypto{
   left: 13.18px;
   font-weight: 900;
   display: inline-block;
-  width: 88px;
+  width: 142px;
   height: 36.14px;
 }
 .btc-graph-inner6,

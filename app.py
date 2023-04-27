@@ -11,6 +11,7 @@ from backend.utils.order_and_wallet import add_order, get_order_history, change_
 from backend.utils.userprofile import get_user_profile, change_pass_help , validate_user_while_login , check_email_exists , add_new_user
 from backend.utils.transaction_history import get_transaction_history_data
 from backend.utils.kyc_api import get_kyc_status,approve_kyc_status,is_single_face
+from backend.utils.fetch_crypto_data_ccxt import fetch_market_page_data, fetch_specific_currency_data, fetch_all_currency_data
 # import backend.utils.validate_fake_data
 # import read_n_write_image_with_sql
 from backend.utils.image import is_allowed_file, convert_to_writable
@@ -45,7 +46,6 @@ db = mysql.connector.connect(
 def first():
     return render_template('login.html', msg = '')
 
-
 @app.route('/login', methods =['POST'])
 def login():
     cursor = db.cursor()
@@ -62,6 +62,12 @@ def login():
                 session['username'] = data['username']
                 message = 'Logged in successfully!'
                 cursor.close()
+                
+                try:
+                    fetch_market_page_data()
+                except:
+                    pass
+                
                 return redirect(url_for('dashboard',userid=session['id']))
             else:
                 message = 'Invalid email id or password!'
@@ -106,6 +112,12 @@ def register():
                 session['username'] = data['username']
                 message = 'You have successfully registered !'
                 cursor.close()
+                
+                try:
+                    fetch_market_page_data()
+                except:
+                    pass
+                
                 return redirect(url_for('dashboard'))
         elif request.method == 'POST':
             cursor.close()
@@ -237,7 +249,6 @@ def market_allcrypto():
         msg = str(e)
         print(e)
     cursor.close()
-    print(json_data)
     return render_template('market_allcrypto.html',jsondata=json_data,msg=msg)
     
 @app.route('/mark_fav/<string:fav>')
@@ -292,7 +303,6 @@ def p2p_sell():
     try:
         list_ = get_p2p_sell_page_data()
         list_ = sorted(list_, key=lambda x: -x['price'])
-        print(list_)
     except Exception as e:
         msg = str(e)
     cursor.close()
@@ -353,7 +363,6 @@ def user_profile():
     msg = ''
     try:
         data = get_user_profile(session['id'])
-        print(data['profile_pic'][-50:-35])
         cursor.close()
         return render_template('user_profile.html', data=data,msg=msg)
     except Exception as e:
@@ -361,18 +370,17 @@ def user_profile():
         print(msg)
         cursor.close()
         return render_template('user_profile.html', data=data,msg=msg)
-    # data['profile_pic'] = 'data:image/png;base64,' + data['profile_pic'].decode('utf-8')
-   
+
 @app.route('/upload_pic',methods = ['GET','POST'])
 def upload_pic():
     msg = ''
     cursor = db.cursor()
     if 'id' not in session:
         return redirect(url_for('login'))
-    
+
     if request.method == "POST":
         try:
-            # print(request.files)
+            print(request.files)
             if 'photo' in request.files:
                 photo = request.files['photo']
                 if photo.filename != '' and is_allowed_file(photo.filename): # Check if the file has an allowed image extension
@@ -381,42 +389,22 @@ def upload_pic():
                     encoded_data = base64.b64encode(image_data) # Encode the binary data as base64
                     cursor.execute('UPDATE userinfo SET profile_pic = %s WHERE email_id = %s', (encoded_data.decode('UTF-8') , session['id']))
                     db.commit()
-
                     msg = 'IMAGE UPDATED SUCCESSFULLY!'
-                    # user_data['profile_pic'] = 'data:image/png;base64,' + base64.b64encode(user_data['profile_pic']).decode('utf-8')
+                    user_data= get_user_profile(session['id'])
+                    user_data['profile_pic'] = encoded_data.decode("UTF-8")
+                    cursor.close()
+                    return jsonify({'msg':msg, 'profile_pic':user_data['profile_pic']})
                 else:
-                    msg="Only png , jpg and jpeg format is allowed"
-                    # user_data['profile_pic_ext'] = os.path.splitext(photo.filename)[-1]
-                    # image = 'data:image/png;base64,' + base64.b64encode(user_data['profile_pic']).decode('utf-8')
-                    # user_data['profile_pic']= image
-                    # print(6)
-            user_data= get_user_profile(session['id'])
-            # print(encoded_data[-50:-35],"here 2")
-            user_data['profile_pic'] = encoded_data.decode("UTF-8")
-            #return redirect(url_for('user_profile'))
-            #return render_template('user_profile.html',data= user_data,msg=msg)
-            # print(user_data['profile_pic'][-50:-35])
-            cursor.close()
-            # print(msg)
-            return jsonify({'msg':msg, 'profile_pic':user_data['profile_pic']})
+                    raise Exception("Only png , jpg and jpeg format is allowed")
         except Exception as e:
-            # print(e, "ERROR COMING HERE")
-            msg = 'IMAGE CANNOT BE UPDATED!'
-            # if user_data['profile_pic']!="":
-                # user_data['profile_pic'] = 'data:image/png;base64,' + base64.b64encode(user_data['profile_pic']).decode('utf-8')   
+            if(str(e)=='Only png , jpg and jpeg format is allowed'):
+                msg = str(e)
+            else:
+                msg = "IMAGE CANNOT BE UPDATED!"
             user_data= get_user_profile(session['id'])
             cursor.close()
-            return render_template('user_profile.html',data=user_data,msg=msg)
-    else:
-        # print(8)
-        try:
-            cursor.execute('SELECT profile_pic from userinfo where email_id=%s',(session['id']))
-            image = cursor.fetchone()[0]
-            image = base64.b64decode(image)
-        except :
-            msg = 'IMAGE CANNOT BE ACCESED AT THE MOMENT !'
-        cursor.close()
-        return render_template('user_profile.html',data = user_data,msg=msg)
+            return render_template('user_profile.html', data= user_data, msg=msg)
+
 
 @app.route('/kyc', methods=['POST'])
 def kyc():
@@ -471,6 +459,13 @@ def trade_page(crypto,time_frame):
     cursor = db.cursor()
     image = ''
     crypto_details = {}
+    
+    try:
+        fetch_specific_currency_data(crypto+"/USDT", time_frame)
+        fetch_market_page_data()
+    except:
+        pass
+        
     try:
         (image,crypto_details) = form_graph(crypto,time_frame)
         wallet_data = get_wallet_data(session['id'])
@@ -485,6 +480,12 @@ def trade_page(crypto,time_frame):
 @app.route('/do_crypto_trade/<string:order_type>/<string:crypto>/<string:usdt_qty>')
 def do_crypto_trade(order_type, crypto, usdt_qty):
     cursor = db.cursor()
+    
+    try:
+        fetch_market_page_data()
+    except:
+        pass
+    
     try:
         change_wallet(session['id'], order_type, crypto, usdt_qty)
     except Exception as e:
@@ -494,87 +495,143 @@ def do_crypto_trade(order_type, crypto, usdt_qty):
     cursor.close()
     return redirect(url_for('trade_page', crypto = crypto, time_frame="1m"))
 
-
 @app.route('/chat_buy/<string:seller_mailID>',methods = ['GET','POST'])
 def chat_buy(seller_mailID):
     cursor = db.cursor()
+    print(1)
     if request.method == 'POST' and 'messageInput' in request.form:
+        print('in post')
         message = request.form["messageInput"]
         try:
+            print('updating')
             update_chat_txt(session['id'],session['id'],seller_mailID,message)
+            print('update done')
             cursor.close()
-            return redirect(url_for('chat_buy'))
+            return redirect(url_for('chat_buy',seller_mailID=seller_mailID))
         except Exception as e:
+            print('error')
+            final = {}
+            final['username'] = ''
+            final['data'] = []
+            final['my_mail'] = session['id']
             msg = str(e)
             cursor.close()
-            return render_template('chat_buy.html',msg=msg)
+            return render_template('chat_buy.html',msg=msg,data=final,mail_id=seller_mailID)
     elif request.method == "POST" and 'photo' in request.files:
         photo = request.files['photo']
         try:
             update_chat_image(session['id'],session['id'],seller_mailID,photo)
             cursor.close()
-            return redirect(url_for('chat_buy'))
+            return redirect(url_for('chat_buy',seller_mailID=seller_mailID))
         except Exception as e:
+            final = {}
+            final['username'] = ''
+            final['data'] = []
+            final['my_mail'] = session['id']
             msg = str(e)
             cursor.close()
-            return render_template('chat_buy.html',msg=msg)
+            return render_template('chat_buy.html',msg=msg,data=final,mail_id=seller_mailID)
     else:
         msg = ''
         # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT chat_messages FROM chat WHERE (email_id1 = %s AND email_id2 = %s) OR (email_id1 = %s AND email_id2 = %s)',(session['id'],seller_mailID,seller_mailID,session['id'],))
         t = cursor.fetchone()
+        cursor.execute('SELECT username from userinfo where email_id = %s',(seller_mailID,))
+        final = {}
+        final['username'] = cursor.fetchone()[0]
+        final['my_mail'] = session['id']
         if t!=None:
             data = json.loads(t[0])
-            if len(data[seller_mailID]) == 0 and len(data[session['id']]) == 0:
-                msg = 'No messages'
+            final['data'] = data
             cursor.close()
-            return render_template('chat_buy.html',data=data,msg=msg)
+            return render_template('chat_buy.html',data=final,msg=msg,mail_id = seller_mailID)
         else:
             msg="No Message"
-            data=[]
+            data = []
+            final['data'] = data
             cursor.close()
-            return render_template('chat_buy.html',data=data,msg=msg)
+            return render_template('chat_buy.html',data=final,msg=msg,mail_id=seller_mailID)
 
 @app.route('/chat_sell/<string:buyer_mailID>',methods = ['GET','POST'])
 def chat_sell(buyer_mailID):
     cursor = db.cursor()
+    cursor.execute('SELECT email_id from userinfo where email_id=%s',(buyer_mailID,))
+    mail_id = cursor.fetchone()[0]
+    # print(request.form['messageInput'])
+    # print(1)
     if request.method == 'POST' and 'messageInput' in request.form:
         message = request.form["messageInput"]
+        print('hi')
         try:
             update_chat_txt(session['id'],session['id'],buyer_mailID,message)
+            cursor.execute('SELECT chat_messages FROM chat WHERE (email_id1 = %s AND email_id2 = %s) OR (email_id1 = %s AND email_id2 = %s)',(session['id'],buyer_mailID,buyer_mailID,session['id'],))
+            print(cursor.fetchone()[0])
+            print(session['id'])
             cursor.close()
-            return redirect(url_for('chat_sell'))
+            return redirect(url_for('chat_sell',buyer_mailID=buyer_mailID))
         except Exception as e:
+            final = {}
+            print("in except")
+            final['username'] = ''
+            final['data'] = []
             msg = str(e)
             cursor.close()
-            return render_template('chat_sell.html',msg=msg)
+            return render_template('chat_sell.html',msg=msg,data=final,mail_id=buyer_mailID)
         
     elif request.method == "POST" and 'photo' in request.files:
+        print("here1")
         photo = request.files['photo']
         try:
             update_chat_image(session['id'],session['id'],buyer_mailID,photo)
             cursor.close()
-            return redirect(url_for('chat_sell'))
+            return redirect(url_for('chat_sell',buyer_mailID=buyer_mailID))
         except Exception as e:
+            final = {}
+            final['username'] = ''
+            final['data'] = []
             msg = str(e)
             cursor.close()
-            return render_template('chat_sell.html',msg=msg)
+            return render_template('chat_sell.html',msg=msg,data=final,mail_id=buyer_mailID)
     else:
+        print('here2 get method')
         msg = ''
         # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT chat_messages FROM chat WHERE (email_id1 = %s AND email_id2 = %s) OR (email_id1 = %s AND email_id2 = %s)',(session['id'],buyer_mailID,buyer_mailID,session['id'],))
         t = cursor.fetchone()
+        cursor.execute('SELECT username from userinfo where email_id = %s',(buyer_mailID,))
+        final = {}
+        final['username'] = cursor.fetchone()[0]
+        final['my_mail'] = session['id']
         if t!=None:
-            data = json.loads(t['chat_messages'])
-            if len(data[buyer_mailID]) == 0 and len(data[session['id']]) == 0:
-                msg = 'No messages'
+            data = json.loads(t[0])
+            final['data'] = data
             cursor.close()
-            return render_template('chat_sell.html',data=data,msg=msg)
+            return render_template('chat_sell.html',data=final,msg=msg,mail_id=buyer_mailID)
         else:
             data=[]
+            final['data'] = data
             cursor.close()
-            return render_template('chat_sell.html',data=data,msg=msg)
-
+            return render_template('chat_sell.html',data=final,msg=msg,mail_id=buyer_mailID)
+        
+@app.route('/release/<string:buyer_mailid>',methods = ['POST'])
+def release(buyer_mailid):
+    try:
+        if request.method == 'POST' and 'amount' in request.form:
+            print(1,request.form)
+            amount = request.form['amount']
+            print('HI',session['id'])
+            
+            if (deduct_usdt_from_wallet_when_released_in_p2p(session['id'], float(amount)) and add_usdt_to_wallet_when_bought_from_p2p(buyer_mailid, float(amount))):
+                # flash(msg)
+                print('HI')
+                return redirect(url_for('p2p_sell'))
+            
+    except Exception as e:
+        msg = str(e)
+        print(msg)
+        # flash(msg)
+        return redirect(url_for('chat_sell',buyer_mailID=buyer_mailid))
+    
 # @app.route('/dropdown')
 # def dropdown():
 #     return render_template('dropdown.html')

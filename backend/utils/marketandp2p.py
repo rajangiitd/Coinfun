@@ -195,9 +195,9 @@ def deduct_usdt_from_wallet_when_released_in_p2p(email_id, balance_to_deduct):
         cursor.execute('SELECT wallet FROM userinfo WHERE email_id = %s', (email_id,))
         wallet = cursor.fetchone()[0]
         wallet = json.loads(wallet)
-        if(balance_to_deduct > wallet['USDT']):
+        if(balance_to_deduct > wallet['USDT_in_bid']):
             raise Exception("Your amount entered exceeds upper limit of your order amount!")
-        wallet['USDT']-=balance_to_deduct
+        wallet['USDT_in_bid']-=balance_to_deduct
         wallet = json.dumps(wallet)
         cursor.execute("UPDATE userinfo SET wallet = %s WHERE email_id= %s",(wallet,email_id,))
         db.commit()

@@ -106,25 +106,57 @@
 <body>
     <div class="header">
         <span>selling to :</span>
-        <span> Alex</span>
-        <form class = "form">
-            <input type="number" placeholder="Quantity">
-            <button>Release</button>
+        <span> {{data['username']}}</span>
+        <form class = "form" method="POST" action="/release/{{mail_id}}">
+            <input type="number" id="amount" name="amount"  placeholder="Quantity">
+            <button type="submit">Release</button>
         </form>
     </div>
     <div class="chat" id="chat">
-        <div class="message">
-            <div class="meta">Alex (12:00 PM)</div>
+        {% if data['data']|length == 0 %}
+            <h1>No Messages Yet</h1>
+        {% else %}
+            {% for rows in data['data'] %}
+                {% if data['my_mail']== rows['sender'] %}
+                    <div class="message sent">
+                        <div class="meta"></div>
+                        <div class="text">{{rows['message']}}</div>
+                    </div>
+                {% else %}
+                    <div class="message">
+                        <div class="meta"></div>
+                        <div class="text">{{rows['message']}}</div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        <!-- {% for rows in data['data'] %}
+            {% if data['my_mail']== rows['sender'] %}
+                <div class="message sent">
+                    <div class="meta"></div>
+                    <div class="text">{{rows['message']}}</div>
+                </div>
+            {% else %}
+                <div class="message">
+                    <div class="meta"></div>
+                    <div class="text">{{rows['message']}}</div>
+                </div>
+            {% endif %}
+        {% endfor %} -->
+        <!-- <div class="message">
+            <div class="meta"></div>
             <div class="text">Hi there, how are you doing?</div>
-        </div>
-        <div class="message sent">
-            <div class="meta">You (12:01 PM)</div>
+        </div> -->
+        <!-- <div class="message sent">
+            <div class="meta"></div>
             <div class="text">I'm good, thanks for asking. How about you?</div>
-        </div>
+        </div> -->
         <!-- Add more chat messages here -->
     </div>
-    <form class="form" onsubmit="return sendMessage()">
-        <input type="text" id="messageInput" placeholder="Type your message here...">
+    <form class="form" method="POST" action="/chat_sell/{{mail_id}}">
+        <input type="text" id="messageInput" name="messageInput" placeholder="Type your message here..." required>
         <input type="submit" value="Send">
     </form>
+
 </body>
+</html>

@@ -44,6 +44,12 @@ rel="stylesheet" href="{{url_for('static',filename='css/user_profile.css')}}"
     </div>
     {% if msg|length > 0 %}
       <h2 id="msg" style="position: relative; top: 450px; left: 550px;">{{msg}}</h2>
+    {% else %}
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <h2 id="msg" style="position: relative; top: 450px; left: 550px;">{{messages[0]}}</h2>
+      {% endif %}
+      {% endwith %}
     {% endif %}
     <!-- <h2 style="position: relative; top: 450px; left: 550px;">Hello Vikash -> {{msg}}</h2> -->
 
@@ -60,7 +66,6 @@ rel="stylesheet" href="{{url_for('static',filename='css/user_profile.css')}}"
           }, duration);
         }
         }
-        
       var message = "{{msg}}";
       showMessage(message, 10000);
 

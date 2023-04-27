@@ -51,6 +51,10 @@ rel="stylesheet" href="{{url_for('static',filename='css/btc_graph.css')}}"
       </div>
     </div>
   </div>
+  <a href="/trade_page/{{data['symbol']}}/1m"  style="position: relative;">
+    <img class="refresh-img" src="{{url_for('static',filename='images/refresh.jpg')}}" alt="Refresh">
+  </a>
+  
   <b class="coinfun">Coinfun</b>
   <img class="image-14-icon" alt="Graph" src="data:image/jpg;charset=utf-8;base64,{{ image }}" />
   <div class="btc-graph-inner4">
@@ -80,7 +84,7 @@ rel="stylesheet" href="{{url_for('static',filename='css/btc_graph.css')}}"
       <div class="price-24407-container">
         <span>Price</span><br><span class="usdt">  {{data['last_price']}} USDT</span> <br><br>
         <span>Available USDT</span><span class="usdt"><br></span>  {{data['USDT']}}</span> <br><br>
-        <span>Available {{data['symbol']}}</span><span class="usdt"><br></span>{{data['crypto_size']}} USDT</span> <br><br>
+        <span>Available {{data['symbol']}}</span><span class="usdt"><br></span>{{data['crypto_size']}}</span> <br><br>
         <!-- <span class="usdt">Available {{data['symbol']}} {{data['last_price']}} USDT</p> -->
         <span>Estimated Crypto Value</span><span class="usdt">  {{data['Current_crypto_value']}} USDT</span>
       </div>
@@ -101,8 +105,7 @@ rel="stylesheet" href="{{url_for('static',filename='css/btc_graph.css')}}"
   </div>
   {% with messages = get_flashed_messages() %}
   {% if messages %}
-   
-    <h1 style="text-align: center;">{{messages[0]}}</h1>
+    <h3 style="text-align: center; color: red; position: absolute; top: 830px; left: 1050px;">{{messages[0]}}</h3>
   {% endif %}
   {% endwith %}
 
