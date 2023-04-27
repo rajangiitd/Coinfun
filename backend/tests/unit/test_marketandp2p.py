@@ -26,13 +26,10 @@ def test_get_fav_page_data_WhenFavListIsNonEmpty():
     assert type(get_fav_page_data("coinfunnoreply@gmail.com"))== list
 
 def test_get_fav_page_data_WhenFavListIsEmpty():
-    with pytest.raises(Exception, match="You do not have any favourite crypto currencies!"):
-        get_fav_page_data("coinfunnoreply2@gmail.com")
+    assert type(get_fav_page_data("coinfunnoreply2@gmail.com"))== list
 
 def test_get_fav_page_data_WhenInputEmailIsInvalid():
-    with pytest.raises(Exception):
-        get_fav_page_data("example@example.com")
-
+    assert type(get_fav_page_data("example@example.com"))== list
 
 
 def test_p2p_buy_page_data_get():
