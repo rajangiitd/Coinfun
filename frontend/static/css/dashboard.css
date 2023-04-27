@@ -492,7 +492,6 @@ body{
     position: relative;
     width: 100%;
     height: 875px;
-    overflow: hidden;
     background-image: url(./public/p2p-sell@3x.png);
     background-size: cover;
     background-repeat: no-repeat;
@@ -571,5 +570,6 @@ body{
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 100px;
 
 }
