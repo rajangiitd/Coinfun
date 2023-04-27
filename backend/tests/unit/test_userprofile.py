@@ -1,6 +1,17 @@
 import pytest
-from backend.utils.userprofile import get_user_profile, change_pass_help
+from backend.utils.userprofile import get_user_profile, change_pass_help, validate_user_while_login, add_new_user, drop_user_having_data_only_in_userinfo
+from backend.utils.encryption_scheme import encrypt_password
 
+def test_validate_user_while_login_WhenInputIsValid():
+    assert validate_user_while_login("Coinfunnoreply@gmail.com" , "Testaccount1Testaccount1") == True
+
+def test_validate_user_while_login_WhenInputIsInValid():
+    assert validate_user_while_login("Coinfunnoreply@example.com" , "Testaccount1Testaccount1") == False
+
+def test_add_and_drop_a_new_valid_user():
+    assert add_new_user("Coinfunnoreply4@gmail.com","Testaccount4", encrypt_password("Testaccount4Testaccount4"), "999999999999") ==True
+    assert drop_user_having_data_only_in_userinfo("Coinfunnoreply4@gmail.com") == True
+    
 def test_get_user_profile_WhenInputIsValid():
     # Test if a valid email is accepted
     email = "coinfunnoreply@gmail.com"

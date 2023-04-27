@@ -8,7 +8,7 @@ from backend.utils.encryption_scheme import is_password_valid, encrypt_password
 from backend.utils.dashboard import get_wallet_data
 from backend.utils.marketandp2p import get_market_data, get_fav_crypto_list, get_fav_page_data, get_p2p_buy_page_data, get_p2p_sell_page_data, form_graph
 from backend.utils.order_and_wallet import add_order, get_order_history, change_wallet
-from backend.utils.userprofile import get_user_profile, change_pass_help
+from backend.utils.userprofile import get_user_profile, change_pass_help , validate_user_while_login , check_email_exists , add_new_user
 from backend.utils.transaction_history import get_transaction_history_data
 from backend.utils.kyc_api import get_kyc_status,approve_kyc_status,is_single_face
 # import backend.utils.validate_fake_data
@@ -55,21 +55,34 @@ def login():
     try:
         message = ''
         if request.method == 'POST' and 'email' in request.form and 'password' in request.form:
-            email = request.form['email']
+            email_id = request.form['email']
             password = request.form['password']	
-            cursor.execute('SELECT * FROM userinfo WHERE email_id = %s AND password = %s', (email,encrypt_password(password),))
-            account = cursor.fetchone()
-            if account != None:
+            account = validate_user_while_login(email_id, password)
+            if(account == True):
+                data = get_user_profile(email_id)
                 session['loggedin'] = True
-                session['id'] = account[0]
-                session['username'] = account[1]
-                message = 'Logged in successfully !'
+                session['id'] = data['email_id']
+                session['username'] = data['username']
+                message = 'Logged in successfully!'
                 cursor.close()
                 return redirect(url_for('dashboard',userid=session['id']))
             else:
-                message = 'Incorrect username / password !'
+                message = 'Invalid email id or password!'
+            #cursor.execute('SELECT * FROM userinfo WHERE email_id = %s AND password = %s', (email,encrypt_password(password),))
+            #account = cursor.fetchone()
+            # if account != None:
+            #     session['loggedin'] = True
+            #     session['id'] = account[0]
+            #     session['username'] = account[1]
+            #     message = 'Logged in successfully !'
+            #     cursor.close()
+            #     return redirect(url_for('dashboard',userid=session['id']))
+            # else:
+            #     message = 'Invalid email id or password!'
     except Exception as e:
         message = str(e)
+        if( message == "PasswordEncryptionFailed!"):
+            message = "Invalid email id or password!"
     cursor.close()
     return render_template('login.html', msg = message)
 
@@ -80,11 +93,13 @@ def register():
     try:
         msg = ''
         if request.method == 'POST' and 'username' in request.form and 'email' in request.form and 'password' in request.form and 'confirm-password' in request.form and 'phone-number' in request.form:
+            print(request.form)
             username = request.form['username']
             password = request.form['password']
             email_id = request.form['email']
             confirm_password=request.form['confirm-password']
             phone_number = request.form['phone-number']
+            pic = ""
             # profile_pic = request.files['profile_pic']
             # if profile_pic and allowed_file(profile_pic.filename):
             #     filename = secure_filename(profile_pic.filename)
@@ -96,48 +111,71 @@ def register():
             #data_directory = os.path.join(script_directory, 'backend','utils','data')
             #file_path = data_directory + '/' + 'blank.jpg'
             #pic = convert_to_writable(file_path)
-            pic = ""
             # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute('SELECT * FROM userinfo WHERE email_id = %s', (email_id,))
-            user = cursor.fetchone()
-            if (user != None):
-                msg = 'Account already exists !'
+            print(re.match(r'[A-Za-z0-9]+', username))
+            if(check_email_exists(email_id) == True):
+                raise Exception('Email Account already exists!')
             elif not re.match(r'[^@]+@[^@]+\.[^@]+', email_id):
-                msg = 'Invalid email address !'
-            elif not re.match(r'[A-Za-z0-9]+', username):
-                msg = 'Username must contain only characters and numbers !'
+                raise Exception('Invalid email address !')
+            elif is_valid_domain(email_id)==False:
+                raise Exception('Please use gmail, yahoo, outlook , hotmail or iitd.ac.in domain')
+            elif not re.match( r'^[A-Za-z0-9]+$' , username):
+                raise Exception('Username must contain only characters and numbers!')
             elif password!=confirm_password:
                 raise Exception("Your password does not matches the confirm password !")
             elif is_password_valid(password) == False:
                 raise Exception("Please enter a valid password, it should contain atleast 1 capital and 1 small alphabets and atleast 1 digit with length between 8-25")
             else:
-                # prepare the SQL query
-                sql = "INSERT INTO userinfo (email_id, username, password, wallet, favourites, profile_pic, kyc, contact) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-                values = (email_id, username, encrypt_password(password), '{"ADA": 0.0, "BNB": 0.0, "BTC": 0.0, "ETH": 0.0, "SOL":  0.0, "XRP": 0.0, "DOGE": 0.0, "USDT": 0.0, "MATIC": 0.0, "USDT_in_bid": 0.0}', "", "" , False, phone_number)
-                cursor.execute(sql, values)
+                add_new_user( email_id, username, encrypt_password(password), phone_number)
                 db.commit()
-                #cursor.execute('INSERT INTO userinfo VALUES ( %s, %s, %s, "{"ADA": 0.0, "BNB": 0.0, "BTC": 0.0, "ETH": 0.0, "SOL":  0.0, "XRP": 0.0, "DOGE": 0.0, "USDT": 0.0, "MATIC": 0.0, "USDT_in_bid": 0.0}", "", % s, false,%s)', (email,username, encrypt_password(password),pic,phone_number, ))
-                # mysql.connection.commit()
-                cursor.execute('SELECT email_id, username FROM userinfo WHERE email_id = %s', (email_id,))
-                result = cursor.fetchone()
-                user_id = result[0]
-                username = result[1]
-                # Set session variables
+                data = get_user_profile(email_id)
                 session['loggedin'] = True
-                session['id'] = user_id
-                session['username'] = username
-                msg = 'You have successfully registered !'
+                session['id'] = data['email_id']
+                session['username'] = data['username']
+                message = 'You have successfully registered !'
                 cursor.close()
                 return redirect(url_for('dashboard'))
+                
+                # cursor.execute('SELECT * FROM userinfo WHERE email_id = %s', (email_id,))
+                # user = cursor.fetchone()
+                # if (user != None):
+                #     msg = 'Email Account already exists!'
+                # elif not re.match(r'[^@]+@[^@]+\.[^@]+', email_id):
+                #     msg = 'Invalid email address !'
+                # elif not re.match(r'[A-Za-z0-9]+', username):
+                #     msg = 'Username must contain only characters and numbers !'
+                # elif password!=confirm_password:
+                #     raise Exception("Your password does not matches the confirm password !")
+                # elif is_password_valid(password) == False:
+                #     raise Exception("Please enter a valid password, it should contain atleast 1 capital and 1 small alphabets and atleast 1 digit with length between 8-25")
+                # else:
+                    # prepare the SQL query
+                    # sql = "INSERT INTO userinfo (email_id, username, password, wallet, favourites, profile_pic, kyc, contact) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+                    # values = (email_id, username, encrypt_password(password), '{"ADA": 0.0, "BNB": 0.0, "BTC": 0.0, "ETH": 0.0, "SOL":  0.0, "XRP": 0.0, "DOGE": 0.0, "USDT": 0.0, "MATIC": 0.0, "USDT_in_bid": 0.0}', "", "" , False, phone_number)
+                    # cursor.execute(sql, values)
+                    # db.commit()
+                    #cursor.execute('INSERT INTO userinfo VALUES ( %s, %s, %s, "{"ADA": 0.0, "BNB": 0.0, "BTC": 0.0, "ETH": 0.0, "SOL":  0.0, "XRP": 0.0, "DOGE": 0.0, "USDT": 0.0, "MATIC": 0.0, "USDT_in_bid": 0.0}", "", % s, false,%s)', (email,username, encrypt_password(password),pic,phone_number, ))
+                    # mysql.connection.commit()
+                    # cursor.execute('SELECT email_id, username FROM userinfo WHERE email_id = %s', (email_id,))
+                    # result = cursor.fetchone()
+                    # user_id = result[0]
+                    # username = result[1]
+                    # # Set session variables
+                    # session['loggedin'] = True
+                    # session['id'] = user_id
+                    # session['username'] = username
+                    # msg = 'You have successfully registered !'
+                    # cursor.close()
+                    # return redirect(url_for('dashboard'))
         elif request.method == 'POST':
-            msg = 'Please fill all the blank columns !'
+            cursor.close()
+            raise Exception('Please fill all the blank columns !')
     except Exception as e:
         msg = str(e)
+        if( msg == "PasswordEncryptionFailed!"):
+            msg = "Please enter a valid password, it should contain atleast 1 capital and 1 small alphabets and atleast 1 digit with length between 8-25"
     cursor.close()
     return render_template('register.html', msg = msg)
-
-    
-
 
 @app.route('/dashboard')
 def dashboard():
@@ -173,36 +211,41 @@ def transaction():
     cursor.close()
     return render_template('transaction.html',data=data,msg=msg)
 
-@app.route('/otp_verification', methods=['POST'])
+@app.route('/otp_verification', methods=['POST','GET'])
 def otp_verification():
-    cursor = db.cursor()
-    if request.method == 'POST' and 'otp' in request.form:
-        entered_otp = request.form['otp']
-        if entered_otp == session['otp']:
-            # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            # cursor.execute('UPDATE userinfo SET kyc = true WHERE email_id = % s', (session['id'],))
-            # mysql.connection.commit()
+    msg=''
+    try:
+        cursor = db.cursor()
+        if request.method == 'POST' and 'otp' in request.form:
+            entered_otp = request.form['otp']
+            print("hrere", entered_otp, session['otp'])
+            print(type(entered_otp), type(session['otp']) )
+            
+            if entered_otp == session['otp']:                
+                # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+                # cursor.execute('UPDATE userinfo SET kyc = true WHERE email_id = % s', (session['id'],))
+                # mysql.connection.commit()
+                print("here in otp verification in if") 
+                cursor.close()
+                return redirect(url_for('reset_password'))
+            else:
+                cursor.close()
+                print("here in otp verification in else")
+                return render_template('otp.html', msg='Invalid OTP. Please try again.')
+        elif request.method == 'POST':
             cursor.close()
-            return redirect(url_for('reset_password'))
-        else:
-            cursor.close()
-            return render_template('otp.html', msg='Invalid OTP. Please try again.')
-    elif request.method == 'POST':
-        cursor.close()
-        return render_template('otp.html', msg='Please enter OTP.')
-    # else:
-    #     msg = ''
-    #     try:
-    #         msg = 'OTP sent successfully to your registered email ID'
-    #         session['otp'] = send_otp(session['id'])
-    #     except Exception as e:
-    #         msg = str(e)
-    #     cursor.close()
-    #     return render_template('otp.html',msg=msg)
+            return render_template('otp.html', msg='Please enter OTP.')
+    except Exception as e:
+        msg = str(e)
+    cursor.close()
+    return render_template('otp.html', msg = msg)
+            
+   
+    
 @app.route('/resend_otp')
 def resend_otp():
     session['otp'] = send_otp(session['id'])
-    print(session['otp'],session['id'])
+    print(session['otp'],session['id'], "inside rseeend")
     return render_template('otp.html')
 
 @app.route('/enter_email', methods=['POST','GET'])
@@ -210,32 +253,24 @@ def enter_email():
     cursor = db.cursor()
     msg = ''
     try:
-        if(request.method=="POST"):
-            print(1)
-        if(request.method=="GET"):
-            print(2)
-        print(request.form)
-        if request.method == 'POST' or request.method == 'GET'and 'email' in request.form:
-            print(1)
+        if request.method == 'POST' and 'email' in request.form:
             email = request.form['email']
-            cursor.execute('SELECT * FROM userinfo WHERE email_id = %s', (email,))
-            user = cursor.fetchone()
-            if (user == None):
-                msg = 'Account does not exists !'
-            elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
-                msg = 'Invalid email address !'
+            if (check_email_exists(email)==False):
+                raise Exception('Account does not exists!')
+            elif is_valid_domain(email)==False:
+                raise Exception('Invalid email address domain, Please use gmail or iitd.ac.in :)!')
             else:
                 try:
-                    session['otp'] = send_otp(session['id'])
+                    session['otp'] = str(send_otp(session['id']))
+                    print(session['otp'])
                 except Exception as e:
-                    msg = str(e)
+                    raise e
                 msg = 'OTP sent successfully to your registered email ID'
                 session['id'] = email
                 cursor.close()
-                return render_template('enteremail.html',msg=msg)
+                return redirect(url_for('otp_verification'))
         elif request.method == 'POST':
             msg = 'Please enter the email !'
-            print(msg)
     except Exception as e:
         msg = str(e)
     cursor.close()
