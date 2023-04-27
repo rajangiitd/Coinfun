@@ -62,7 +62,7 @@ def change_wallet(email_id, order_type, crypto , usdt_qty):
         market_data = get_market_data()
         
         last_price = next((item['last_price'] for item in market_data if item['symbol'].startswith(crypto)), None)
-        
+        usdt_qty = float(usdt_qty)
         cursor.execute('SELECT wallet from userinfo where email_id=%s', (email_id,))
         t = cursor.fetchone()
         wallet = json.loads(t[0])

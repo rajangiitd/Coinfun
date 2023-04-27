@@ -1,4 +1,4 @@
-from flask import Flask , render_template , request , redirect , url_for , session, send_file, jsonify
+from flask import Flask , render_template , request , redirect , url_for , session, send_file, jsonify , flash
 # from flask_sqlalchemy import SQLAlchemy
 # from flask_mysqldb import MySQL 
 import mysql.connector
@@ -10,6 +10,7 @@ from backend.utils.marketandp2p import get_market_data, get_fav_crypto_list, get
 from backend.utils.order_and_wallet import add_order, get_order_history, change_wallet
 from backend.utils.userprofile import get_user_profile, change_pass_help
 from backend.utils.transaction_history import get_transaction_history_data
+from backend.utils.kyc_api import get_kyc_status,approve_kyc_status,is_single_face
 # import backend.utils.validate_fake_data
 # import read_n_write_image_with_sql
 from backend.utils.image import is_allowed_file, convert_to_writable
@@ -117,7 +118,6 @@ def register():
                 db.commit()
                 #cursor.execute('INSERT INTO userinfo VALUES ( %s, %s, %s, "{"ADA": 0.0, "BNB": 0.0, "BTC": 0.0, "ETH": 0.0, "SOL":  0.0, "XRP": 0.0, "DOGE": 0.0, "USDT": 0.0, "MATIC": 0.0, "USDT_in_bid": 0.0}", "", % s, false,%s)', (email,username, encrypt_password(password),pic,phone_number, ))
                 # mysql.connection.commit()
-
                 cursor.execute('SELECT email_id, username FROM userinfo WHERE email_id = %s', (email_id,))
                 result = cursor.fetchone()
                 user_id = result[0]
@@ -136,6 +136,7 @@ def register():
     cursor.close()
     return render_template('register.html', msg = msg)
 
+    
 
 
 @app.route('/dashboard')
@@ -172,7 +173,7 @@ def transaction():
     cursor.close()
     return render_template('transaction.html',data=data,msg=msg)
 
-@app.route('/otp-verification', methods=['GET', 'POST'])
+@app.route('/otp_verification', methods=['POST'])
 def otp_verification():
     cursor = db.cursor()
     if request.method == 'POST' and 'otp' in request.form:
@@ -185,26 +186,37 @@ def otp_verification():
             return redirect(url_for('reset_password'))
         else:
             cursor.close()
-            return render_template('otp_verification.html', msg='Invalid OTP. Please try again.')
+            return render_template('otp.html', msg='Invalid OTP. Please try again.')
     elif request.method == 'POST':
         cursor.close()
-        return render_template('otp_verification.html', msg='Please enter OTP.')
-    else:
-        msg = ''
-        try:
-            msg = 'OTP sent successfully to your registered email ID'
-            session['otp'] = send_otp(session['id'])
-        except Exception as e:
-            msg = str(e)
-        cursor.close()
-        return render_template('otp_verification.html',msg=msg)
+        return render_template('otp.html', msg='Please enter OTP.')
+    # else:
+    #     msg = ''
+    #     try:
+    #         msg = 'OTP sent successfully to your registered email ID'
+    #         session['otp'] = send_otp(session['id'])
+    #     except Exception as e:
+    #         msg = str(e)
+    #     cursor.close()
+    #     return render_template('otp.html',msg=msg)
+@app.route('/resend_otp')
+def resend_otp():
+    session['otp'] = send_otp(session['id'])
+    print(session['otp'],session['id'])
+    return render_template('otp.html')
 
-@app.route('/enter_email', methods=['GET', 'POST'])
+@app.route('/enter_email', methods=['POST','GET'])
 def enter_email():
     cursor = db.cursor()
     msg = ''
     try:
-        if request.method == 'POST' and 'email' in request.form:
+        if(request.method=="POST"):
+            print(1)
+        if(request.method=="GET"):
+            print(2)
+        print(request.form)
+        if request.method == 'POST' or request.method == 'GET'and 'email' in request.form:
+            print(1)
             email = request.form['email']
             cursor.execute('SELECT * FROM userinfo WHERE email_id = %s', (email,))
             user = cursor.fetchone()
@@ -213,19 +225,23 @@ def enter_email():
             elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
                 msg = 'Invalid email address !'
             else:
+                try:
+                    session['otp'] = send_otp(session['id'])
+                except Exception as e:
+                    msg = str(e)
                 msg = 'OTP sent successfully to your registered email ID'
                 session['id'] = email
                 cursor.close()
-                return render_template('forgotpasswordotp.html',msg=msg)
-        else:
+                return render_template('enteremail.html',msg=msg)
+        elif request.method == 'POST':
             msg = 'Please enter the email !'
-        
+            print(msg)
     except Exception as e:
         msg = str(e)
     cursor.close()
-    return render_template('forgotdpasswordemailreset.html', msg = msg)
+    return render_template('enter_email.html', msg = msg)
 
-@app.route('/reset_password', methods=['GET', 'POST'])
+@app.route('/reset_password', methods=['POST','GET'])
 def reset_password():
     msg = ''
     cursor = db.cursor()
@@ -246,10 +262,7 @@ def reset_password():
     except Exception as e:
         msg = str(e)
     cursor.close()
-    return render_template('forgotpasswordresetsuccessful.html',msg=msg)
-
-
-    
+    return render_template('newpassword.html',msg=msg)
 
 @app.route('/market_allcrypto')
 def market_allcrypto():
@@ -344,7 +357,6 @@ def p2p_add_usdt(email_id, balance_to_add):
     cursor.close()
     return redirect(url_for('p2p_buy'))
 
-
 @app.route('/p2p_deduct_usdt/<float:balance>')  
 def p2p_deduct_usdt(email_id, balance_to_deduct):
     cursor = db.cursor()
@@ -420,7 +432,7 @@ def upload_pic():
     
     if request.method == "POST":
         try:
-            print(request.files)
+            # print(request.files)
             if 'photo' in request.files:
                 photo = request.files['photo']
                 if photo.filename != '' and is_allowed_file(photo.filename): # Check if the file has an allowed image extension
@@ -437,18 +449,18 @@ def upload_pic():
                     # user_data['profile_pic_ext'] = os.path.splitext(photo.filename)[-1]
                     # image = 'data:image/png;base64,' + base64.b64encode(user_data['profile_pic']).decode('utf-8')
                     # user_data['profile_pic']= image
-                    print(6)
+                    # print(6)
             user_data= get_user_profile(session['id'])
-            print(encoded_data[-50:-35],"here 2")
+            # print(encoded_data[-50:-35],"here 2")
             user_data['profile_pic'] = encoded_data.decode("UTF-8")
             #return redirect(url_for('user_profile'))
             #return render_template('user_profile.html',data= user_data,msg=msg)
-            print(user_data['profile_pic'][-50:-35])
+            # print(user_data['profile_pic'][-50:-35])
             cursor.close()
-            print(msg)
+            # print(msg)
             return jsonify({'msg':msg, 'profile_pic':user_data['profile_pic']})
         except Exception as e:
-            print(e, "ERROR COMING HERE")
+            # print(e, "ERROR COMING HERE")
             msg = 'IMAGE CANNOT BE UPDATED!'
             # if user_data['profile_pic']!="":
                 # user_data['profile_pic'] = 'data:image/png;base64,' + base64.b64encode(user_data['profile_pic']).decode('utf-8')   
@@ -456,7 +468,7 @@ def upload_pic():
             cursor.close()
             return render_template('user_profile.html',data=user_data,msg=msg)
     else:
-        print(8)
+        # print(8)
         try:
             cursor.execute('SELECT profile_pic from userinfo where email_id=%s',(session['id']))
             image = cursor.fetchone()[0]
@@ -465,8 +477,44 @@ def upload_pic():
             msg = 'IMAGE CANNOT BE ACCESED AT THE MOMENT !'
         cursor.close()
         return render_template('user_profile.html',data = user_data,msg=msg)
-        
-        
+
+
+@app.route('/kyc', methods=['POST'])
+def kyc():
+    msg = ''
+    if(get_kyc_status(session['id'])):
+        return redirect(url_for('user_profile'))
+    cursor = db.cursor()
+    if 'id' not in session:
+        return redirect(url_for('login'))
+    if request.method == "POST":
+        try:
+            # print(request.files)
+            if 'photo' in request.files:
+                photo = request.files['photo']
+                if photo.filename != '' and is_allowed_file(photo.filename): # Check if the file has an allowed image extension
+                    # Read the binary data from the file
+                    image_data = photo.read()
+                    encoded_data = base64.b64encode(image_data) # Encode the binary data as base64
+                    decoded_img = encoded_data.decode("UTF-8")
+                    if (is_single_face(decoded_img)):
+                        approve_kyc_status(session['id'])
+                        msg = 'Congratulations! you are now a verified user'
+                    else:
+                        msg = "You couldn't be verified. Please Try Again !"
+                elif photo.filename == '':
+                    msg="Please select a photo in png, jpg or jpeg format showing your face clearly!"
+                elif is_allowed_file(photo.filename)==False:
+                    msg = "Only png, jpg or jpeg format are allowed"
+                user_data= get_user_profile(session['id'])
+                cursor.close()
+                return render_template('user_profile.html',data=user_data,msg=msg)
+        except Exception as e:
+            msg = str(e)
+            user_data= get_user_profile(session['id'])
+            cursor.close()
+            return render_template('user_profile.html',data=user_data,msg=msg)
+            
 @app.route('/order_history')
 def order_history():
     cursor = db.cursor()
@@ -487,23 +535,25 @@ def trade_page(crypto,time_frame):
     try:
         (image,crypto_details) = form_graph(crypto,time_frame)
         wallet_data = get_wallet_data(session['id'])
-        crypto_details["crypto_size"] = wallet_data[crypto]
-        crypto_details["USDT"] = wallet_data["USDT"]
+        crypto_details["crypto_size"] = round(next((item['amount'] for item in wallet_data['data'] if item['symbol'] == crypto), 0),5)
+        crypto_details["USDT"] = round( next((item['amount'] for item in wallet_data['data'] if item['symbol'] == 'USDT'), 0),2)
         crypto_details["Current_crypto_value"] = crypto_details["last_price"]*crypto_details["crypto_size"]
     except Exception as e:
         msg = str(e)
     cursor.close()
-    return render_template('btc_graph.html',image=image,data=crypto_details)
+    return render_template('crypto_graph.html',image=image,data=crypto_details)
 
-@app.route('/change_wallet/<string:order_type>/<string:crypto>/<float:usdt_qty>')
-def change_wallet(order_type, crypto, usdt_qty):
+@app.route('/do_crypto_trade/<string:order_type>/<string:crypto>/<string:usdt_qty>')
+def do_crypto_trade(order_type, crypto, usdt_qty):
     cursor = db.cursor()
     try:
-        change_wallet(session['id'],order_type,crypto,usdt_qty)
+        change_wallet(session['id'], order_type, crypto, usdt_qty)
     except Exception as e:
         msg = str(e)
+        flash(msg)
+        return redirect(url_for('trade_page', crypto=crypto, time_frame='1m', error=msg))
     cursor.close()
-    return redirect(url_for('trade_page'))
+    return redirect(url_for('trade_page', crypto = crypto, time_frame="1m"))
 
 
 @app.route('/chat_buy/<string:seller_mailID>',methods = ['GET','POST'])

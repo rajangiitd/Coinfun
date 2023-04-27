@@ -62,13 +62,13 @@ rel="stylesheet" href="{{url_for('static',filename='css/btc_graph.css')}}"
         <button type="button" class="btn btn-primary trading-button" onclick="window.location.href= '/trade_page/{{data['symbol']}}/1d' ;">1 Day Chart</button>
       </div>
   </div>
-  <div class="btc-graph-inner5 transform-rigth">
-    <button class="rectangle-parent6" id="groupButton5">
+  <div class="btc-graph-inner5 transform-rigth-quantity">
+    <button class="rectangle-parent6" id="buy">
       <div class="group-child7"></div>
       <div class="buy-btc">Buy {{data['symbol']}}</div>
     </button>
   </div>
-  <div class="btc-graph-inner6 transform-rigth">
+  <div class="btc-graph-inner6 transform-rigth-quantity">
     <button class="rectangle-parent7" id="sell">
       <div class="group-child8"></div>
       <div class="sell-btc">Sell {{data['symbol']}}</div>
@@ -78,14 +78,15 @@ rel="stylesheet" href="{{url_for('static',filename='css/btc_graph.css')}}"
     <div class="rectangle-parent8">
       <div class="group-child9"></div>
       <div class="price-24407-container">
-        <span>Price</span><span class="usdt"> $ {{data['last_price']}} USDT</span>
-        <span>Available USDT</span><span class="usdt"> $ {{data['last_price']}} USDT</span>
-        <span>Available {{data['symbol']}}</span><span class="usdt"> $ {{data['last_price']}} USDT</span>
-        <span>Estimated Crypto Value</span><span class="usdt"> $ {{data['last_price']}} USDT</span>
+        <span>Price</span><br><span class="usdt">  {{data['last_price']}} USDT</span> <br><br>
+        <span>Available USDT</span><span class="usdt"><br></span>  {{data['USDT']}}</span> <br><br>
+        <span>Available {{data['symbol']}}</span><span class="usdt"><br></span>{{data['crypto_size']}} USDT</span> <br><br>
+        <!-- <span class="usdt">Available {{data['symbol']}} {{data['last_price']}} USDT</p> -->
+        <span>Estimated Crypto Value</span><span class="usdt">  {{data['Current_crypto_value']}} USDT</span>
       </div>
     </div>
   </div>
-  <div class="btc-graph-inner8 transform-rigth">
+  <div class="btc-graph-inner8 transform-rigth-quantity">
     <div class="rectangle-parent8">
       <div class="group-child9"></div>
       <div class="price-24407-container">
@@ -94,10 +95,17 @@ rel="stylesheet" href="{{url_for('static',filename='css/btc_graph.css')}}"
           <input type="number" id="amount" name="amount" required>
           <button type="submit">Submit</button>
         </form> -->
-        <input type="number" name="Enter Quantity" id="amount" >
+        <input type="number" name="Enter Quantity" placeholder="Enter Quantity" id="amount" >
       </div>
     </div>
   </div>
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+   
+    <h1 style="text-align: center;">{{messages[0]}}</h1>
+  {% endif %}
+  {% endwith %}
+
   <p class="paragraph-xyz-crypto">
       {% if data['symbol'] == "BTC" %}
         About Bitcoin (BTC) <br>
@@ -204,7 +212,7 @@ loadGoogleTranslate"></script>
     });
   }
 
-  var groupButton5 = document.getElementById("groupButton5");
+  var groupButton5 = document.getElementById("buy");
   if (groupButton5) {
     groupButton5.addEventListener("click", function (e) {
       var amountInput = document.getElementById("amount");
@@ -213,7 +221,7 @@ loadGoogleTranslate"></script>
           alert("Please enter a quantity.");
           return;
         }
-      window.location.href = "/change_wallet/{{data['symbol']}}/"+amountValue;
+      window.location.href = "/do_crypto_trade/buy/{{data['symbol']}}/"+amountValue;
 
       // Please sync "P2P Buy" to the project
     });
@@ -229,7 +237,7 @@ loadGoogleTranslate"></script>
           alert("Please enter a quantity.");
           return;
         }
-      window.location.href = "/change_wallet/{{data['symbol']}}/"+amountValue;
+      window.location.href = "/do_crypto_trade/sell/{{data['symbol']}}/"+amountValue;
 
       // Please sync "P2P Buy" to the project
     });

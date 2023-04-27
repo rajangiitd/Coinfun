@@ -11,15 +11,15 @@ rel="stylesheet" href="{{url_for('static',filename='css/user_profile.css')}}"
 <h1 style="color: rgb(255, 0, 157); margin-left: 800px; font-size: 60px;">Coinfun</h1>
   <div class="user_profile">
     <div class="user_profile1" style="margin-left: 100px;">
-      <p>Username: {{data['username']}}</p>
-      <p>Email: {{data['email_id']}}</p>
-      <p>Phone: {{data['contact_number']}}</p>
+      <h2>Username: {{data['username']}}</h2>
+      <h2>Email: {{data['email_id']}}</h2>
+      <h2>Phone: {{data['contact_number']}}</h2>
       {% if data['kyc'] %}
-        <p>Status: Verified</p>
+        <h2>Status: Verified</h2>
       {% else %}
-        <p>Status : UnVerified</p>
-        <h2 style="position: relative; top: 100px; margin-left: -100px;">Upload your clear Photo for kyc</h2>
-        <form id="upload_pic_kyc" action="/upload_pic" method="POST" enctype="multipart/form-data" style="position: relative; margin-top: 100px;">
+        <h2>Status : UnVerified</h2>
+        <h2 style="position: relative; top: 100px; margin-left: -100px;">Upload your Photo showing your face clearly</h2>
+        <form action="/kyc" method="POST" enctype="multipart/form-data" style="position: relative; margin-top: 100px;">
           <input type="file" name="photo">
           <button type="submit" class="btn btn-success"
             style="font-size: 20px; color: black; position: relative;  background-color: rgb(187, 34, 121); border-radius: 10px; margin-top: 20px; margin-left: -80px;">Get Verified
@@ -31,7 +31,7 @@ rel="stylesheet" href="{{url_for('static',filename='css/user_profile.css')}}"
     <div id="photo_form" class="change_photo">
       {% if data['profile_pic']|length > 0 %}
         <img id="profile_pic" src="data:image/png;charset=utf-8;base64,{{ data['profile_pic'] }}" alt="Profile_Pic"
-        style="margin-right: 100px; margin-top: 100px; height: 150px; width: 150px; border-radius: 20px; ">
+        style="margin-right: -200px; margin-top: 100px; height: 185px; width: 185px; border-radius: 20px; ">
       {% else %}
         <img id="profile_pic" src="{{url_for('static',filename='images/blank.jpg')}}" alt="Profile_Pic" style="margin-right: 100px; margin-top: 100px; height: 150px; width: 150px; border-radius: 20px;">
       {% endif %}
@@ -43,12 +43,28 @@ rel="stylesheet" href="{{url_for('static',filename='css/user_profile.css')}}"
       </form>
     </div>
     {% if msg|length > 0 %}
-      <h1 style="position: relative; top: 450px; left: 550px;">{{msg}}</h1>
+      <h2 id="msg" style="position: relative; top: 450px; left: 550px;">{{msg}}</h2>
     {% endif %}
     <!-- <h2 style="position: relative; top: 450px; left: 550px;">Hello Vikash -> {{msg}}</h2> -->
 
 
 <script>
+
+    function showMessage(message, duration) {
+        var messageElement = document.getElementById("msg");
+        if(messageElement!=null){
+          messageElement.innerHTML = message;
+          messageElement.style.display = "block";
+          setTimeout(function() {
+            messageElement.style.display = "none";
+          }, duration);
+        }
+        }
+        
+      var message = "{{msg}}";
+      showMessage(message, 10000);
+
+
   var profile_pic = document.getElementById("profile_pic");
   var groupButton = document.getElementById("logout");
   if (groupButton) {
@@ -80,6 +96,7 @@ rel="stylesheet" href="{{url_for('static',filename='css/user_profile.css')}}"
       window.location.href = "/dashboard";
     });
   }
+  
   var photo_form = document.getElementById("photo_form");
   var uploadForm = document.getElementById("upload_pic_form");
   if (uploadForm) {

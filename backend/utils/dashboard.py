@@ -13,6 +13,7 @@ db = mysql.connector.connect(
 )
 
 def get_wallet_data(email_id):
+    # returns a dict with keys username->username, data-->list of dicts, est_balance--> total balance 
     try:
         cursor = db.cursor()
         cursor.execute('SELECT wallet FROM userinfo where email_id=%s',(email_id,))

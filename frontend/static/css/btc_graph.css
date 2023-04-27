@@ -433,6 +433,10 @@ p.paragraph-xyz-crypto{
   transform: translate(850px, -300px);
 }
 
+.transform-rigth-quantity{
+  transform: translate(850px,-70px);
+}
+
 .trading-button-container{
   display: flex;
   flex-direction: column;
