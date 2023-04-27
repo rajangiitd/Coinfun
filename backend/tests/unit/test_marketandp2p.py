@@ -1,5 +1,6 @@
 import pytest ,os , base64
-from backend.utils.marketandp2p import get_market_data, get_fav_crypto_list, get_fav_page_data, get_p2p_buy_page_data ,get_p2p_sell_page_data, form_graph
+from backend.utils.marketandp2p import get_market_data, get_fav_crypto_list, get_fav_page_data, get_p2p_buy_page_data ,get_p2p_sell_page_data, form_graph , add_usdt_to_wallet_when_bought_from_p2p, deduct_usdt_from_wallet_when_released_in_p2p
+from backend.utils.dashboard import get_wallet_data
 
 def test_get_market_deta_WhenInputIsValid():
     assert type(get_market_data("coinfunnoreply3@gmail.com")) == list
@@ -50,3 +51,15 @@ def test_form_graph_WhenInputIsValid():
 def test_form_graph_WhenInputIsInValid():
     with pytest.raises(Exception):
         data = form_graph("example", "1m")
+
+def test_add_usdt_to_wallet_when_bought_from_p2p_whenInputIsValid():
+    initial_wallet = get_wallet_data("coinfunnoreply@gmail.com")
+    initial_USDT = next((item['amount'] for item in initial_wallet['data'] if item['symbol'] == 'USDT'), 0)
+    assert add_usdt_to_wallet_when_bought_from_p2p("coinfunnoreply@gmail.com", 100) == True
+    final_wallet = get_wallet_data("coinfunnoreply@gmail.com")
+    final_USDT = next((item['amount'] for item in final_wallet['data'] if item['symbol'] == 'USDT'), 0)
+    assert abs(final_USDT - initial_USDT - 100) < 0.1
+    assert deduct_usdt_from_wallet_when_released_in_p2p("coinfunnoreply@gmail.com", 100) == True
+    latest_wallet = get_wallet_data("coinfunnoreply@gmail.com")
+    latest_USDT = next((item['amount'] for item in latest_wallet['data'] if item['symbol'] == 'USDT'), 0)
+    assert abs(latest_USDT-initial_USDT) < 0.1

@@ -6,7 +6,7 @@ import mysql.connector
 # import hashlib
 from backend.utils.encryption_scheme import is_password_valid, encrypt_password
 from backend.utils.dashboard import get_wallet_data
-from backend.utils.marketandp2p import get_market_data, get_fav_crypto_list, get_fav_page_data, get_p2p_buy_page_data, get_p2p_sell_page_data, form_graph
+from backend.utils.marketandp2p import get_market_data, get_fav_crypto_list, get_fav_page_data, get_p2p_buy_page_data, get_p2p_sell_page_data, form_graph , add_usdt_to_wallet_when_bought_from_p2p, deduct_usdt_from_wallet_when_released_in_p2p
 from backend.utils.order_and_wallet import add_order, get_order_history, change_wallet
 from backend.utils.userprofile import get_user_profile, change_pass_help , validate_user_while_login , check_email_exists , add_new_user
 from backend.utils.transaction_history import get_transaction_history_data
@@ -29,12 +29,9 @@ from PIL import Image
 from time import sleep
 from flask import make_response
 
-# app=Flask(__name__, static_folder='/frontend/static',template_folder='/frontend/templates')
-
 app = Flask(__name__, static_folder=os.path.join(os.getcwd(), 'frontend', 'static'), template_folder=os.path.join(os.getcwd(), 'frontend', 'templates'))
 
 app.secret_key = 'Teamwork123'
-
 
 db = mysql.connector.connect(
     host="localhost",
@@ -68,17 +65,6 @@ def login():
                 return redirect(url_for('dashboard',userid=session['id']))
             else:
                 message = 'Invalid email id or password!'
-            #cursor.execute('SELECT * FROM userinfo WHERE email_id = %s AND password = %s', (email,encrypt_password(password),))
-            #account = cursor.fetchone()
-            # if account != None:
-            #     session['loggedin'] = True
-            #     session['id'] = account[0]
-            #     session['username'] = account[1]
-            #     message = 'Logged in successfully !'
-            #     cursor.close()
-            #     return redirect(url_for('dashboard',userid=session['id']))
-            # else:
-            #     message = 'Invalid email id or password!'
     except Exception as e:
         message = str(e)
         if( message == "PasswordEncryptionFailed!"):
@@ -86,33 +72,19 @@ def login():
     cursor.close()
     return render_template('login.html', msg = message)
 
-
 @app.route('/register', methods=['POST','GET'])
 def register():
     cursor = db.cursor()
     try:
         msg = ''
         if request.method == 'POST' and 'username' in request.form and 'email' in request.form and 'password' in request.form and 'confirm-password' in request.form and 'phone-number' in request.form:
-            print(request.form)
             username = request.form['username']
             password = request.form['password']
             email_id = request.form['email']
             confirm_password=request.form['confirm-password']
             phone_number = request.form['phone-number']
             pic = ""
-            # profile_pic = request.files['profile_pic']
-            # if profile_pic and allowed_file(profile_pic.filename):
-            #     filename = secure_filename(profile_pic.filename)
-            #     profile_pic.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            #     pic = url_for('static', filename='uploads/' + filename)
-            # else:
-            #script_directory = os.path.dirname(os.path.abspath(__file__))
-            # Define the path to the data directory relative to the script directory
-            #data_directory = os.path.join(script_directory, 'backend','utils','data')
-            #file_path = data_directory + '/' + 'blank.jpg'
-            #pic = convert_to_writable(file_path)
-            # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            print(re.match(r'[A-Za-z0-9]+', username))
+
             if(check_email_exists(email_id) == True):
                 raise Exception('Email Account already exists!')
             elif not re.match(r'[^@]+@[^@]+\.[^@]+', email_id):
@@ -135,38 +107,6 @@ def register():
                 message = 'You have successfully registered !'
                 cursor.close()
                 return redirect(url_for('dashboard'))
-                
-                # cursor.execute('SELECT * FROM userinfo WHERE email_id = %s', (email_id,))
-                # user = cursor.fetchone()
-                # if (user != None):
-                #     msg = 'Email Account already exists!'
-                # elif not re.match(r'[^@]+@[^@]+\.[^@]+', email_id):
-                #     msg = 'Invalid email address !'
-                # elif not re.match(r'[A-Za-z0-9]+', username):
-                #     msg = 'Username must contain only characters and numbers !'
-                # elif password!=confirm_password:
-                #     raise Exception("Your password does not matches the confirm password !")
-                # elif is_password_valid(password) == False:
-                #     raise Exception("Please enter a valid password, it should contain atleast 1 capital and 1 small alphabets and atleast 1 digit with length between 8-25")
-                # else:
-                    # prepare the SQL query
-                    # sql = "INSERT INTO userinfo (email_id, username, password, wallet, favourites, profile_pic, kyc, contact) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-                    # values = (email_id, username, encrypt_password(password), '{"ADA": 0.0, "BNB": 0.0, "BTC": 0.0, "ETH": 0.0, "SOL":  0.0, "XRP": 0.0, "DOGE": 0.0, "USDT": 0.0, "MATIC": 0.0, "USDT_in_bid": 0.0}', "", "" , False, phone_number)
-                    # cursor.execute(sql, values)
-                    # db.commit()
-                    #cursor.execute('INSERT INTO userinfo VALUES ( %s, %s, %s, "{"ADA": 0.0, "BNB": 0.0, "BTC": 0.0, "ETH": 0.0, "SOL":  0.0, "XRP": 0.0, "DOGE": 0.0, "USDT": 0.0, "MATIC": 0.0, "USDT_in_bid": 0.0}", "", % s, false,%s)', (email,username, encrypt_password(password),pic,phone_number, ))
-                    # mysql.connection.commit()
-                    # cursor.execute('SELECT email_id, username FROM userinfo WHERE email_id = %s', (email_id,))
-                    # result = cursor.fetchone()
-                    # user_id = result[0]
-                    # username = result[1]
-                    # # Set session variables
-                    # session['loggedin'] = True
-                    # session['id'] = user_id
-                    # session['username'] = username
-                    # msg = 'You have successfully registered !'
-                    # cursor.close()
-                    # return redirect(url_for('dashboard'))
         elif request.method == 'POST':
             cursor.close()
             raise Exception('Please fill all the blank columns !')
@@ -179,15 +119,10 @@ def register():
 
 @app.route('/dashboard')
 def dashboard():
-    # cursor = mysql.connection.cursor(dictionary=True) # Use dictionary cursor
-    # cursor.execute('SELECT username from userinfo where email_id = %s',(userid,))
-    # dic1 = cursor.fetchone()
-    # if dic1: # Check if user exists
     msg = ''
     data = []
     cursor = db.cursor()
     try:
-        print("here 2")
         data= get_wallet_data(session['id'])
         data_ = data['data']
         data_ = [{**d, 'price': str(round(float(d['price']), 2))} for d in data_]
@@ -218,19 +153,11 @@ def otp_verification():
         cursor = db.cursor()
         if request.method == 'POST' and 'otp' in request.form:
             entered_otp = request.form['otp']
-            print("hrere", entered_otp, session['otp'])
-            print(type(entered_otp), type(session['otp']) )
-            
-            if entered_otp == session['otp']:                
-                # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-                # cursor.execute('UPDATE userinfo SET kyc = true WHERE email_id = % s', (session['id'],))
-                # mysql.connection.commit()
-                print("here in otp verification in if") 
+            if entered_otp == session['otp']:
                 cursor.close()
                 return redirect(url_for('reset_password'))
             else:
                 cursor.close()
-                print("here in otp verification in else")
                 return render_template('otp.html', msg='Invalid OTP. Please try again.')
         elif request.method == 'POST':
             cursor.close()
@@ -239,13 +166,10 @@ def otp_verification():
         msg = str(e)
     cursor.close()
     return render_template('otp.html', msg = msg)
-            
-   
-    
+
 @app.route('/resend_otp')
 def resend_otp():
     session['otp'] = send_otp(session['id'])
-    print(session['otp'],session['id'], "inside rseeend")
     return render_template('otp.html')
 
 @app.route('/enter_email', methods=['POST','GET'])
@@ -346,18 +270,15 @@ def mark_unfav(fav):
     except Exception as e:
         msg = str(e)
         return redirect(url_for('market_allcrypto'))
-        
 
 @app.route('/p2p_buy')
 def p2p():
-    # This is the code for p2p buy page
-    list_ = []
+    list_ = []      # This is the code for p2p buy page
     msg = ''
     cursor = db.cursor()
     try:
         list_ = get_p2p_buy_page_data()
         list_ = sorted(list_, key=lambda x: x['price'])
-        print(list_)
     except Exception as e:
         msg = str(e)
     cursor.close()
@@ -365,8 +286,7 @@ def p2p():
 
 @app.route('/p2p_sell')
 def p2p_sell():
-                # This is the code for p2p sell page
-    list_ = []
+    list_ = []    # This is the code for p2p sell page
     msg = ''
     cursor = db.cursor()
     try:
@@ -380,33 +300,22 @@ def p2p_sell():
     
 @app.route('/p2p_add_usdt/<float:balance>')  
 def p2p_add_usdt(email_id, balance_to_add):
-    cursor = db.cursor()
-    # cursor.execute("SELECT JSON_EXTRACT(wallet, '$.USDT') FROM userinfo WHERE emailid=%s",(session['id'],))
-    cursor.execute('SELECT wallet FROM userinfo WHERE email_id = %s', (session['id'],))
-    wallet = cursor.fetchone()[0]
-    wallet = json.loads(wallet)
-    wallet['USDT']+=balance_to_add
-    wallet = json.dumps(wallet)
-    cursor.execute("UPDATE userinfo SET wallet = %s WHERE email_id= %s",(wallet,session['id'],))
-    db.commit()
-    cursor.close()
-    return redirect(url_for('p2p_buy'))
+    try:
+        #email_id = session['id']
+        add_usdt_to_wallet_when_bought_from_p2p(email_id, balance_to_add)
+        return redirect(url_for('p2p_buy'))
+    except:
+        return redirect(url_for('p2p_buy'))
 
 @app.route('/p2p_deduct_usdt/<float:balance>')  
 def p2p_deduct_usdt(email_id, balance_to_deduct):
-    cursor = db.cursor()
-    cursor.execute('SELECT wallet FROM userinfo WHERE email_id = %s', (session['id'],))
-    wallet = cursor.fetchone()[0]
-    wallet = json.loads(wallet)
-    if(balance_to_deduct > wallet['USDT']):
-        raise Exception("Your amount entered exceeds the order amount!")
-    wallet['USDT']-=balance_to_deduct
-    wallet = json.dumps(wallet)
-    cursor.execute("UPDATE userinfo SET wallet = %s WHERE email_id= %s",(wallet,session['id'],))
-    db.commit()
-    cursor.close()
-    return redirect(url_for('p2p_sell'))
-    
+    try:
+        #email_id = session['id']
+        deduct_usdt_from_wallet_when_released_in_p2p(email_id, balance_to_deduct)
+        return redirect(url_for('p2p_sell'))
+    except:
+        return redirect(url_for('p2p_sell'))
+        
 @app.route('/change_password',methods = ['POST','GET'])
 def change_password():
     msg = ''
@@ -415,13 +324,10 @@ def change_password():
         current_pass = request.form['password']
         newpass = request.form['new_password']
         newpass_confirm = request.form['confirm_new_password']
-        print(session['id'],current_pass,newpass,newpass_confirm)
-        # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         try:
             msg =  change_pass_help(session['id'],current_pass,newpass,newpass_confirm)
         except Exception as e:
             msg = str(e)
-        print(msg)
     elif request.method == 'POST':
         msg = 'Please fill in all the blanks provided'
     cursor.close()
@@ -439,7 +345,6 @@ def market_fav():
     print(msg)
     cursor.close()
     return render_template('market_fav.html',jsondata=fav_details,msg=msg)
-
 
 @app.route('/user_profile')
 def user_profile():
@@ -512,7 +417,6 @@ def upload_pic():
             msg = 'IMAGE CANNOT BE ACCESED AT THE MOMENT !'
         cursor.close()
         return render_template('user_profile.html',data = user_data,msg=msg)
-
 
 @app.route('/kyc', methods=['POST'])
 def kyc():
@@ -630,7 +534,6 @@ def chat_buy(seller_mailID):
             data=[]
             cursor.close()
             return render_template('chat_buy.html',data=data,msg=msg)
-            
 
 @app.route('/chat_sell/<string:buyer_mailID>',methods = ['GET','POST'])
 def chat_sell(buyer_mailID):
@@ -671,13 +574,10 @@ def chat_sell(buyer_mailID):
             data=[]
             cursor.close()
             return render_template('chat_sell.html',data=data,msg=msg)
-            
-    
+
 # @app.route('/dropdown')
 # def dropdown():
 #     return render_template('dropdown.html')
-
-
 
 if(__name__=="__main__"):
     app.run(debug=True)

@@ -170,5 +170,41 @@ def form_graph(crypto, time_frame, horizontal_size=16, vertical_size=8):
         return ( base64_image, crypto_details) # image is a base64 string, crypto_details is a dictionary
     except Exception as e:
         raise e
-    
-# print(get_market_data("person1@gmail.com"))
+
+def add_usdt_to_wallet_when_bought_from_p2p(email_id, balance_to_add):
+    try:
+        cursor = db.cursor()
+        cursor.execute('SELECT wallet FROM userinfo WHERE email_id = %s', (email_id,))
+        wallet = cursor.fetchone()[0]
+        wallet = json.loads(wallet)
+        wallet['USDT']+=balance_to_add
+        wallet = json.dumps(wallet)
+        cursor.execute("UPDATE userinfo SET wallet = %s WHERE email_id= %s",(wallet,email_id,))
+        db.commit()
+        cursor.close()
+        return True
+    except mysql.connector.Error as e:
+        db.rollback()
+        raise e
+    except Exception as e:
+        raise e
+
+def deduct_usdt_from_wallet_when_released_in_p2p(email_id, balance_to_deduct):
+    try:
+        cursor = db.cursor()
+        cursor.execute('SELECT wallet FROM userinfo WHERE email_id = %s', (email_id,))
+        wallet = cursor.fetchone()[0]
+        wallet = json.loads(wallet)
+        if(balance_to_deduct > wallet['USDT']):
+            raise Exception("Your amount entered exceeds upper limit of your order amount!")
+        wallet['USDT']-=balance_to_deduct
+        wallet = json.dumps(wallet)
+        cursor.execute("UPDATE userinfo SET wallet = %s WHERE email_id= %s",(wallet,email_id,))
+        db.commit()
+        cursor.close()
+        return True
+    except mysql.connector.Error as e:
+        db.rollback()
+        raise e
+    except Exception as e:
+        raise e
