@@ -1,5 +1,6 @@
 import json
 import mysql.connector
+from backend.utils.userprofile import get_user_profile
 
 db = mysql.connector.connect(
     host="localhost",
@@ -11,10 +12,10 @@ db = mysql.connector.connect(
 
 
 def update_chat_txt(sender_email, emailID1, emailID2, message):
-    cursor = db.cursor()
+    cursor = db.cursor()        #emailID1-> looking to buy and emailID2-> looking to sell
     try:
-        if (emailID1 > emailID2):
-            emailID1,emailID2 = emailID2,emailID1
+        #if (emailID1 > emailID2):
+        #    emailID1,emailID2 = emailID2,emailID1
         if(emailID1==emailID2):
             raise "You cannot send message to yourself!"
         cursor.execute('SELECT chat_messages FROM chat WHERE email_id1 = %s AND email_id2 = %s', (emailID1, emailID2,))
@@ -82,3 +83,28 @@ def update_chat_image(sender_email,emailID1,emailID2,photo):
         raise Exception("Chat Messages Coudn't be updated!")
     except:
         raise Exception("Chat Messages Coudn't be updated!")
+
+def get_chat_list(email_id):
+    try:
+        cursor = db.cursor()
+        cursor.execute("SELECT * FROM chat WHERE email_id1 = %s OR email_id2 = %s", (email_id, email_id))
+        chat_list = []
+        for result in cursor:
+            email_id1 = result[0]
+            email_id2 = result[1]
+            if email_id1 == email_id:
+                client_email_id = email_id2
+                order_type = "BUY"
+            else:
+                client_email_id = email_id1
+                order_type = "SELL"
+            username = email_id1[:5]
+            chat_dict = { "client_email_id": client_email_id, "username": get_user_profile(client_email_id)['username'], "order_type": order_type }
+            chat_list.append(chat_dict)
+        cursor.close()
+        return chat_list
+    except:
+        cursor.close()
+        return []
+
+#print(get_chat_list("person4@gmail.com"))

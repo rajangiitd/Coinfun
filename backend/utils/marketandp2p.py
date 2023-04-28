@@ -189,6 +189,62 @@ def add_usdt_to_wallet_when_bought_from_p2p(email_id, balance_to_add):
     except Exception as e:
         raise e
 
+
+def update_p2p_trade_history(buyer_email_id, seller_email_id, transaction_usdt):
+    try:
+        cursor = db.cursor()
+        
+        # Retrieve the bid record for the specified email_id and buy_type
+        query = "SELECT * FROM P2PBiddingData WHERE email_id = %s AND buy_type = FALSE"
+        cursor.execute(query, (seller_email_id,))
+        bid = cursor.fetchone()
+        price = float(bid[3])
+        db.commit()
+        
+        sql = "INSERT INTO P2PTradeHistoryData (buyer_email_id, seller_email_id, transaction_usdt, price, time_stamp) VALUES (%s, %s, %s, %s, NOW())"
+        val = (buyer_email_id, seller_email_id, transaction_usdt, price)
+        cursor.execute(sql, val)
+        db.commit()
+        cursor.close()
+        return True
+    except mysql.connector.Error as e:
+        db.rollback()
+        print(e)
+    except Exception as e:
+        print(e)
+        return False
+
+def update_p2p_bid(email_id, usdt_qnty):
+    try:
+        cursor = db.cursor()
+        # Retrieve the bid record for the specified email_id and buy_type
+        query = "SELECT * FROM P2PBiddingData WHERE email_id = %s AND buy_type = FALSE"
+        cursor.execute(query, (email_id,))
+        bid = cursor.fetchone()
+        
+        new_transaction_usdt = float(bid[2]) - usdt_qnty
+        new_lower_limit = float(bid[5]) - (usdt_qnty * float(bid[3]))
+        new_upper_limit = float(bid[6]) - (usdt_qnty * float(bid[3]))
+        
+        if new_transaction_usdt <=0.1:
+            query = "DELETE FROM P2PBiddingData WHERE email_id = %s AND buy_type = FALSE"
+            cursor.execute(query, (email_id,))
+            db.commit()
+        else:
+            query = "UPDATE P2PBiddingData SET transaction_usdt = %s, lower_limit = %s, upper_limit = %s WHERE email_id = %s AND buy_type = FALSE"
+            cursor.execute(query, (new_transaction_usdt, new_lower_limit, new_upper_limit, email_id))
+            db.commit()
+        cursor.close()
+        return True
+    except mysql.connector.Error as e:
+        db.rollback()
+        cursor.close()
+    except:
+        cursor.close()
+        return False
+        
+
+
 def deduct_usdt_from_wallet_when_released_in_p2p(email_id, balance_to_deduct):
     try:
         cursor = db.cursor()
@@ -201,6 +257,7 @@ def deduct_usdt_from_wallet_when_released_in_p2p(email_id, balance_to_deduct):
         wallet = json.dumps(wallet)
         cursor.execute("UPDATE userinfo SET wallet = %s WHERE email_id= %s",(wallet,email_id,))
         db.commit()
+        update_p2p_bid(email_id, balance_to_deduct)
         cursor.close()
         return True
     except mysql.connector.Error as e:

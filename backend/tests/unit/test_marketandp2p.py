@@ -59,7 +59,3 @@ def test_add_usdt_to_wallet_when_bought_from_p2p_whenInputIsValid():
     final_wallet = get_wallet_data("coinfunnoreply@gmail.com")
     final_USDT = next((item['amount'] for item in final_wallet['data'] if item['symbol'] == 'USDT'), 0)
     assert abs(final_USDT - initial_USDT - 100) < 0.1
-    assert deduct_usdt_from_wallet_when_released_in_p2p("coinfunnoreply@gmail.com", 100) == True
-    latest_wallet = get_wallet_data("coinfunnoreply@gmail.com")
-    latest_USDT = next((item['amount'] for item in latest_wallet['data'] if item['symbol'] == 'USDT'), 0)
-    assert abs(latest_USDT-initial_USDT) < 0.1

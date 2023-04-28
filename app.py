@@ -6,7 +6,7 @@ import mysql.connector
 # import hashlib
 from backend.utils.encryption_scheme import is_password_valid, encrypt_password
 from backend.utils.dashboard import get_wallet_data
-from backend.utils.marketandp2p import get_market_data, get_fav_crypto_list, get_fav_page_data, get_p2p_buy_page_data, get_p2p_sell_page_data, form_graph , add_usdt_to_wallet_when_bought_from_p2p, deduct_usdt_from_wallet_when_released_in_p2p
+from backend.utils.marketandp2p import get_market_data, get_fav_crypto_list, get_fav_page_data, get_p2p_buy_page_data, get_p2p_sell_page_data, form_graph , add_usdt_to_wallet_when_bought_from_p2p, deduct_usdt_from_wallet_when_released_in_p2p, update_p2p_trade_history
 from backend.utils.order_and_wallet import add_order, get_order_history, change_wallet
 from backend.utils.userprofile import get_user_profile, change_pass_help , validate_user_while_login , check_email_exists , add_new_user
 from backend.utils.transaction_history import get_transaction_history_data
@@ -563,7 +563,7 @@ def chat_sell(buyer_mailID):
         message = request.form["messageInput"]
         print('hi')
         try:
-            update_chat_txt(session['id'],session['id'],buyer_mailID,message)
+            update_chat_txt(session['id'],buyer_mailID,session['id'],message)
             cursor.execute('SELECT chat_messages FROM chat WHERE (email_id1 = %s AND email_id2 = %s) OR (email_id1 = %s AND email_id2 = %s)',(session['id'],buyer_mailID,buyer_mailID,session['id'],))
             print(cursor.fetchone()[0])
             print(session['id'])
@@ -582,7 +582,7 @@ def chat_sell(buyer_mailID):
         print("here1")
         photo = request.files['photo']
         try:
-            update_chat_image(session['id'],session['id'],buyer_mailID,photo)
+            update_chat_image(session['id'],buyer_mailID,session['id'],photo)
             cursor.close()
             return redirect(url_for('chat_sell',buyer_mailID=buyer_mailID))
         except Exception as e:
@@ -624,6 +624,7 @@ def release(buyer_mailid):
             if (deduct_usdt_from_wallet_when_released_in_p2p(session['id'], float(amount)) and add_usdt_to_wallet_when_bought_from_p2p(buyer_mailid, float(amount))):
                 # flash(msg)
                 print('HI')
+                update_p2p_trade_history( buyer_mailid, session['id'], amount)
                 return redirect(url_for('p2p_sell'))
             
     except Exception as e:

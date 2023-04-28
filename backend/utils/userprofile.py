@@ -3,6 +3,7 @@ from backend.utils.encryption_scheme import is_password_valid, encrypt_password
 import base64
 from PIL import Image
 import io
+
 db = mysql.connector.connect(
     host="localhost",
     user="root",

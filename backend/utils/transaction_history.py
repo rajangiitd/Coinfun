@@ -46,8 +46,8 @@ def get_transaction_history_data(email_id): # returns a list of dictionaries con
                 temp['client'][1] = row[1]
             temp['client'][0] = get_user_profile(temp['client'][1])['username']
             ## temp['client'] = [username, email_id]
-            temp['transaction_usdt'] = row[3]
-            temp['price'] = row[4]
+            temp['transaction_usdt'] = round(row[3],3)
+            temp['price'] = round(row[4],3)
             temp['net_usdt'] = temp['transaction_usdt'] * temp['price']
             transaction_history.append(temp)
         cursor.close()
