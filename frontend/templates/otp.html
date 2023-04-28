@@ -14,5 +14,22 @@
         <button id="verify-otp-btn" type="submit">Verify OTP</button>
     </form>
     <button id="resend-otp-btn" onclick="window.location.href='/resend_otp';">Resend OTP</button>
+    {% if msg|length > 0 %}
+        <h2 style="">{{msg}}</h2>
+    {% endif %}
 </body>
+
+<script>
+    function showMessage(message, duration) {
+        var messageElement = document.getElementById("msg");
+        messageElement.innerHTML = message;
+        messageElement.style.display = "block";
+        setTimeout(function() {
+            messageElement.style.display = "none";
+        }, duration);
+        }
+    var message = "{{msg}}";
+    showMessage(message, 5000);
+</script>
+
 </html>

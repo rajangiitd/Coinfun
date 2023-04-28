@@ -24,7 +24,7 @@
             flex-direction: column;
             align-items: flex-start;
             margin-bottom: 10px;
-            max-width: 70%;
+            max-width: 100%;
         }
 
         .message.sent {
@@ -88,7 +88,9 @@
 <body>
     <div class="header">
         <span>Buying from :</span>
-        
+        <span>
+            <button style="height: 32px; border-radius: 8px;" onclick="window.location.href='/p2p_buy';"> << BACK TO P2P PORTAL</button>
+        </span>
         <span>{{data['username']}}</span>
     </div>
     <div class="chat" id="chat">

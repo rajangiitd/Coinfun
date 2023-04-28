@@ -19,7 +19,7 @@ from backend.utils.otp import is_valid_domain, send_otp
 # import mysql.connector
 import pandas as pd
 import matplotlib.pyplot as plt
-from backend.utils.chat import update_chat_image, update_chat_txt
+from backend.utils.chat import update_chat_image, update_chat_txt, get_chat_list
 import json
 from datetime import datetime, timedelta
 import re 
@@ -254,13 +254,21 @@ def market_allcrypto():
 @app.route('/mark_fav/<string:fav>')
 def mark_fav(fav):
     cursor = db.cursor()
-    cursor.execute('Select favourites from userinfo where email_id = %s',(session['id'],))
-    favourite = cursor.fetchone()[0]
-    favourites_list = favourite.split(",")
-    if fav.strip() not in favourites_list:
-        cursor.execute("UPDATE userinfo SET favourites = CONCAT(favourites, %s) WHERE email_id =%s",(","+fav,session['id'],))
-        db.commit()
-    print(get_fav_crypto_list(session['id']), "list after mark fav is ending")
+    try:
+        cursor.execute('Select favourites from userinfo where email_id = %s',(session['id'],))
+        favourite = cursor.fetchone()[0]
+        favourites_list = favourite.split(",")
+        if fav.strip() not in favourites_list:
+            favourites_list.append(fav.strip())
+            favourites_list = [x for x in favourites_list if x != '']
+            new_favourites = ",".join(favourites_list)
+            query = "UPDATE userinfo SET favourites = %s WHERE email_id = %s"
+            cursor.execute(query, (new_favourites, session['id']))
+            db.commit()
+    except mysql.connector.Error as e:
+        db.rollback()
+        print(get_fav_crypto_list(session['id']), "list after mark fav is ending")
+        print(str(e))
     cursor.close()
     return redirect(url_for('market_allcrypto'))
 
@@ -280,6 +288,7 @@ def mark_unfav(fav):
         return redirect(url_for('market_allcrypto'))
     except Exception as e:
         msg = str(e)
+        print(str(e))
         return redirect(url_for('market_allcrypto'))
 
 @app.route('/p2p_buy')
@@ -629,7 +638,19 @@ def release(buyer_mailid):
         print(msg, "release")
         # flash(msg)
         return redirect(url_for('chat_sell',buyer_mailID=buyer_mailid))
-    
+
+@app.route("/notifications", methods = ['GET','POST'])
+def chat_notifications():
+    msg=''
+    try:
+        data = get_chat_list(session['id'])
+        if len(data)==0:
+            msg='No Notifications'
+        return render_template('notification.html',data=data,msg=msg)
+    except:
+        msg='Your chats could not be loaded , Please try again later'
+        return render_template('notification.html',data=[],msg=msg)
+
 # @app.route('/dropdown')
 # def dropdown():
 #     return render_template('dropdown.html')

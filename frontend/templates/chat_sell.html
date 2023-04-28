@@ -24,7 +24,7 @@
             flex-direction: column;
             align-items: flex-start;
             margin-bottom: 10px;
-            max-width: 70%;
+            max-width: 100%;
         }
 
         .message.sent {
@@ -106,15 +106,21 @@
 <body>
     <div class="header">
         <span>selling to :</span>
+        <span>
+            <button onclick="window.location.href='/p2p_sell';"> << BACK TO P2P PORTAL</button>
+        </span>
         <span> {{data['username']}}</span>
         <form class = "form" method="POST" action="/release/{{mail_id}}">
-            <input type="number" id="amount" name="amount"  placeholder="Quantity">
+            <input type="number" id="amount" name="amount"  placeholder="Quantity" required>
             <button type="submit">Release</button>
         </form>
     </div>
     <div class="chat" id="chat">
         {% if data['data']|length == 0 %}
-            <h1>No Messages Yet</h1>
+            <div class="message">
+                <div class="meta"></div>
+                <div class="text">No messages yet</div>
+            </div>
         {% else %}
             {% for rows in data['data'] %}
                 {% if data['my_mail']== rows['sender'] %}

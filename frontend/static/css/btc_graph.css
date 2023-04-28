@@ -193,7 +193,7 @@ p.paragraph-xyz-crypto{
 }
 .btc-graph-inner,
 .btc-graph-inner1 {
-  top: 254px;
+  top: 240px;
   left: 337px;
 }
 .btc-graph-inner1 {
@@ -225,7 +225,7 @@ p.paragraph-xyz-crypto{
 .btc-graph-inner3,
 .coinfun {
   position: absolute;
-  top: 254px;
+  top: 240px;
   left: 749px;
   width: 154px;
   height: 70px;
@@ -237,7 +237,7 @@ p.paragraph-xyz-crypto{
 
 .btc-graph-inner3{
   left: 143px;
-  top: 254px;
+  top: 240px;
 
 }
 .coinfun {
@@ -395,7 +395,7 @@ p.paragraph-xyz-crypto{
 .price-24407-container {
   position: absolute;
   top: 9.54px;
-  left: 33.41px;
+  left: 80px;
   font-weight: 900;
   display: inline-block;
   width: 223.14px;

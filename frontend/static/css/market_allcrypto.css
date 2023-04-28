@@ -1,3 +1,10 @@
+body{
+  /* background-image: {{url_for('static',filename='images/p2p_buy.css')}}; */
+  background-image: url("../images/backimg2.webp");
+  /* background-repeat: no-repeat; */
+  background-size: cover;
+}
+
 .all-cryptos-child,
 .group-child {
   position: absolute;
@@ -16,6 +23,7 @@
   height: 43px;
 
 }
+
 .market {
   position: absolute;
   top: 8px;
