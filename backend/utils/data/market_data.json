@@ -1,66 +1,66 @@
 [
   {
     "symbol": "BTC/USDT",
-    "last_price": 29488.21,
-    "24h_change": 1.31,
+    "last_price": 29416.21,
+    "24h_change": 1.91,
     "24h_high": 29893.44,
-    "24h_low": 28551.12,
-    "24h_turnover": 272205671.31900233
+    "24h_low": 28624.23,
+    "24h_turnover": 259034360.90301755
   },
   {
     "symbol": "ETH/USDT",
-    "last_price": 1908.4,
-    "24h_change": -0.48,
+    "last_price": 1905.19,
+    "24h_change": 0.37,
     "24h_high": 1937.68,
     "24h_low": 1861.8,
-    "24h_turnover": 167086558.0537911
+    "24h_turnover": 149856043.438129
   },
   {
     "symbol": "BNB/USDT",
-    "last_price": 327.2274,
-    "24h_change": -2.17,
+    "last_price": 326.9259,
+    "24h_change": -1.45,
     "24h_high": 335.9543,
-    "24h_low": 326.732,
-    "24h_turnover": 1881473.194866002
+    "24h_low": 325.7452,
+    "24h_turnover": 1769126.502458144
   },
   {
     "symbol": "DOGE/USDT",
-    "last_price": 0.08001,
-    "24h_change": -0.07,
+    "last_price": 0.07993,
+    "24h_change": 0.15,
     "24h_high": 0.081,
     "24h_low": 0.07872,
-    "24h_turnover": 6720041.629966
+    "24h_turnover": 6196218.250044
   },
   {
     "symbol": "XRP/USDT",
-    "last_price": 0.4652,
-    "24h_change": -0.3,
+    "last_price": 0.4677,
+    "24h_change": 1.19,
     "24h_high": 0.4693,
     "24h_low": 0.4552,
-    "24h_turnover": 20332452.389015
+    "24h_turnover": 18726398.542882
   },
   {
     "symbol": "MATIC/USDT",
-    "last_price": 1.0106,
-    "24h_change": 0.01,
+    "last_price": 1.004,
+    "24h_change": 0.42,
     "24h_high": 1.0309,
     "24h_low": 0.9784,
-    "24h_turnover": 6143990.963233
+    "24h_turnover": 5816735.217265
   },
   {
     "symbol": "ADA/USDT",
-    "last_price": 0.4086,
-    "24h_change": -0.1,
+    "last_price": 0.4077,
+    "24h_change": 0.99,
     "24h_high": 0.4185,
-    "24h_low": 0.4015,
-    "24h_turnover": 4101373.289997
+    "24h_low": 0.4029,
+    "24h_turnover": 3816637.022781
   },
   {
     "symbol": "SOL/USDT",
-    "last_price": 22.47,
-    "24h_change": 2.6,
+    "last_price": 22.29,
+    "24h_change": 3.1,
     "24h_high": 22.78,
     "24h_low": 21.33,
-    "24h_turnover": 14786781.18284
+    "24h_turnover": 13700181.43641
   }
 ]

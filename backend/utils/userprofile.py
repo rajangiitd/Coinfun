@@ -41,7 +41,7 @@ def add_new_user(email_id, username, encrypted_password, phone_number):
         cursor = db.cursor()
         email_id = email_id.lower()
         sql = "INSERT INTO userinfo (email_id, username, password, wallet, favourites, profile_pic, kyc, contact) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-        values = (email_id, username, encrypted_password , '{"ADA": 0.0, "BNB": 0.0, "BTC": 0.0, "ETH": 0.0, "SOL":  0.0, "XRP": 0.0, "DOGE": 0.0, "USDT": 0.0, "MATIC": 0.0, "USDT_in_bid": 0.0}', "", "" , False, phone_number)
+        values = (email_id, username, encrypted_password , '{"ADA": 0.0, "BNB": 0.0, "BTC": 0.0, "ETH": 0.0, "SOL":  0.0, "XRP": 0.0, "DOGE": 0.0, "USDT": 10000.0, "MATIC": 0.0, "USDT_in_bid": 0.0}', "", "" , False, phone_number)
         cursor.execute(sql, values)
         db.commit()
         cursor.close()

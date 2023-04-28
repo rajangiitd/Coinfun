@@ -190,13 +190,17 @@ def add_usdt_to_wallet_when_bought_from_p2p(email_id, balance_to_add):
         raise e
 
 
-def update_p2p_trade_history(buyer_email_id, seller_email_id, transaction_usdt):
+def update_p2p_trade_history(buyer_email_id, seller_email_id, transaction_usdt, bid_type):
     try:
-        cursor = db.cursor()
+        cursor = db.cursor()                # bid_type = True means VIP user released, else Normal user sold
         
         # Retrieve the bid record for the specified email_id and buy_type
-        query = "SELECT * FROM P2PBiddingData WHERE email_id = %s AND buy_type = FALSE"
-        cursor.execute(query, (seller_email_id,))
+        query = "SELECT * FROM P2PBiddingData WHERE email_id = %s AND buy_type = %s"
+        if(bid_type==True):
+            cursor.execute(query, (seller_email_id, False,))
+        else:
+            cursor.execute(query, (buyer_email_id, True,))
+            
         bid = cursor.fetchone()
         price = float(bid[3])
         db.commit()
@@ -214,12 +218,12 @@ def update_p2p_trade_history(buyer_email_id, seller_email_id, transaction_usdt):
         print(e)
         return False
 
-def update_p2p_bid(email_id, usdt_qnty):
-    try:
+def update_p2p_bid(email_id, usdt_qnty, buy_type):
+    try:                        # buy_type is type of VIP user's bid
         cursor = db.cursor()
-        # Retrieve the bid record for the specified email_id and buy_type
-        query = "SELECT * FROM P2PBiddingData WHERE email_id = %s AND buy_type = FALSE"
-        cursor.execute(query, (email_id,))
+
+        query = "SELECT * FROM P2PBiddingData WHERE email_id = %s AND buy_type = %s"
+        cursor.execute(query, (email_id, buy_type,))
         bid = cursor.fetchone()
         
         new_transaction_usdt = float(bid[2]) - usdt_qnty
@@ -227,37 +231,53 @@ def update_p2p_bid(email_id, usdt_qnty):
         new_upper_limit = float(bid[6]) - (usdt_qnty * float(bid[3]))
         
         if new_transaction_usdt <=0.1:
-            query = "DELETE FROM P2PBiddingData WHERE email_id = %s AND buy_type = FALSE"
-            cursor.execute(query, (email_id,))
+            query = "DELETE FROM P2PBiddingData WHERE email_id = %s AND buy_type = %s"
+            cursor.execute(query, (email_id, buy_type,))
             db.commit()
         else:
-            query = "UPDATE P2PBiddingData SET transaction_usdt = %s, lower_limit = %s, upper_limit = %s WHERE email_id = %s AND buy_type = FALSE"
-            cursor.execute(query, (new_transaction_usdt, new_lower_limit, new_upper_limit, email_id))
+            query = "UPDATE P2PBiddingData SET transaction_usdt = %s, lower_limit = %s, upper_limit = %s WHERE email_id = %s AND buy_type = %s"
+            cursor.execute(query, (new_transaction_usdt, new_lower_limit, new_upper_limit, email_id, buy_type,))
             db.commit()
+        print("here")
         cursor.close()
         return True
     except mysql.connector.Error as e:
         db.rollback()
         cursor.close()
+        return False
     except:
         cursor.close()
         return False
         
 
 
-def deduct_usdt_from_wallet_when_released_in_p2p(email_id, balance_to_deduct):
+def deduct_usdt_from_wallet_when_released_in_p2p(email_id, buyer_mailid, balance_to_deduct):
     try:
         cursor = db.cursor()
         cursor.execute('SELECT wallet FROM userinfo WHERE email_id = %s', (email_id,))
+        print(cursor, "here 1")
         wallet = cursor.fetchone()[0]
         wallet = json.loads(wallet)
-        if(balance_to_deduct > wallet['USDT_in_bid']):
+        
+        if(wallet['USDT_in_bid']>10 and  balance_to_deduct > wallet['USDT_in_bid']):    # VIP user ad ->Invalid order
             raise Exception("Your amount entered exceeds upper limit of your order amount!")
-        wallet['USDT_in_bid']-=balance_to_deduct
-        wallet = json.dumps(wallet)
+        elif(wallet['USDT_in_bid'] + 0.1 >= balance_to_deduct):   # VIP valid order is releasing i.e. buy_type=False
+            wallet['USDT_in_bid']-=balance_to_deduct              # ad was on buy_page 
+            wallet = json.dumps(wallet)
+            update_p2p_trade_history(buyer_mailid, email_id, balance_to_deduct, True)
+            update_p2p_bid(email_id, balance_to_deduct, False)
+        elif(wallet['USDT']> balance_to_deduct + 0.1 ):    # Normal user is selling to VIP buyer i.e. buy_type=True
+            wallet['USDT'] -= balance_to_deduct
+            wallet = json.dumps(wallet)
+            print(2)
+            update_p2p_trade_history(buyer_mailid, email_id, balance_to_deduct, False)
+            update_p2p_bid(buyer_mailid, balance_to_deduct, True)
+        elif(wallet['USDT']< balance_to_deduct ):
+            raise Exception("Your amount entered exceeds your wallet balance!")
+        
         cursor.execute("UPDATE userinfo SET wallet = %s WHERE email_id= %s",(wallet,email_id,))
         db.commit()
-        update_p2p_bid(email_id, balance_to_deduct)
+        
         cursor.close()
         return True
     except mysql.connector.Error as e:

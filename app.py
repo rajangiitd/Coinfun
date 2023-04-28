@@ -6,7 +6,7 @@ import mysql.connector
 # import hashlib
 from backend.utils.encryption_scheme import is_password_valid, encrypt_password
 from backend.utils.dashboard import get_wallet_data
-from backend.utils.marketandp2p import get_market_data, get_fav_crypto_list, get_fav_page_data, get_p2p_buy_page_data, get_p2p_sell_page_data, form_graph , add_usdt_to_wallet_when_bought_from_p2p, deduct_usdt_from_wallet_when_released_in_p2p, update_p2p_trade_history
+from backend.utils.marketandp2p import get_market_data, get_fav_crypto_list, get_fav_page_data, get_p2p_buy_page_data, get_p2p_sell_page_data, form_graph , add_usdt_to_wallet_when_bought_from_p2p, deduct_usdt_from_wallet_when_released_in_p2p, update_p2p_trade_history, update_p2p_bid
 from backend.utils.order_and_wallet import add_order, get_order_history, change_wallet
 from backend.utils.userprofile import get_user_profile, change_pass_help , validate_user_while_login , check_email_exists , add_new_user
 from backend.utils.transaction_history import get_transaction_history_data
@@ -557,8 +557,7 @@ def chat_sell(buyer_mailID):
     cursor = db.cursor()
     cursor.execute('SELECT email_id from userinfo where email_id=%s',(buyer_mailID,))
     mail_id = cursor.fetchone()[0]
-    # print(request.form['messageInput'])
-    # print(1)
+
     if request.method == 'POST' and 'messageInput' in request.form:
         message = request.form["messageInput"]
         print('hi')
@@ -621,15 +620,13 @@ def release(buyer_mailid):
             amount = request.form['amount']
             print('HI',session['id'])
             
-            if (deduct_usdt_from_wallet_when_released_in_p2p(session['id'], float(amount)) and add_usdt_to_wallet_when_bought_from_p2p(buyer_mailid, float(amount))):
+            if (deduct_usdt_from_wallet_when_released_in_p2p(session['id'], buyer_mailid, float(amount)) and add_usdt_to_wallet_when_bought_from_p2p(buyer_mailid, float(amount))):
                 # flash(msg)
                 print('HI')
-                update_p2p_trade_history( buyer_mailid, session['id'], amount)
                 return redirect(url_for('p2p_sell'))
-            
     except Exception as e:
         msg = str(e)
-        print(msg)
+        print(msg, "release")
         # flash(msg)
         return redirect(url_for('chat_sell',buyer_mailID=buyer_mailid))
     
