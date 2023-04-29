@@ -253,8 +253,8 @@ def market_allcrypto():
     
 @app.route('/mark_fav/<string:fav>')
 def mark_fav(fav):
-    cursor = db.cursor()
     try:
+        cursor = db.cursor()
         cursor.execute('Select favourites from userinfo where email_id = %s',(session['id'],))
         favourite = cursor.fetchone()[0]
         favourites_list = favourite.split(",")
@@ -262,15 +262,22 @@ def mark_fav(fav):
             favourites_list.append(fav.strip())
             favourites_list = [x for x in favourites_list if x != '']
             new_favourites = ",".join(favourites_list)
+            print(new_favourites)
             query = "UPDATE userinfo SET favourites = %s WHERE email_id = %s"
             cursor.execute(query, (new_favourites, session['id']))
             db.commit()
+            cursor.close()
+        return redirect(url_for('market_allcrypto'))
     except mysql.connector.Error as e:
         db.rollback()
         print(get_fav_crypto_list(session['id']), "list after mark fav is ending")
         print(str(e))
-    cursor.close()
-    return redirect(url_for('market_allcrypto'))
+        cursor.close()
+        return redirect(url_for('market_allcrypto'))
+    except:
+        print(1)
+        cursor.close()
+        return redirect(url_for('market_allcrypto'))
 
 @app.route('/mark_unfav/<string:fav>')
 def mark_unfav(fav):
@@ -281,14 +288,25 @@ def mark_unfav(fav):
         if fav in favourites:
             favourites = [x for x in favourites if x != fav]
             favourites = ",".join(favourites)
+            print(favourites)
             cursor.execute("UPDATE userinfo SET favourites = %s WHERE email_id =%s",(favourites,session['id'],))
             db.commit()
         #print(get_fav_crypto_list(session['id']), "list after mark unfav is ending")
         cursor.close()
+        print(2)
+        return redirect(url_for('market_allcrypto'))
+    except mysql.connector.Error as e:
+        print(3)
+        db.rollback()
+        print(4)
+        cursor.close()
+        print(5)
         return redirect(url_for('market_allcrypto'))
     except Exception as e:
         msg = str(e)
-        print(str(e))
+        print(str(e), "6")
+        cursor.close()
+        print(7)
         return redirect(url_for('market_allcrypto'))
 
 @app.route('/p2p_buy')
@@ -358,8 +376,10 @@ def market_fav():
     fav_details = []
     msg = ''
     try:
+        print("in try of market_fav",session['id'])
         fav_details = get_fav_page_data(session['id'])
     except Exception as e:
+        print("in except of market_fav")
         msg = str(e)
     print(msg)
     cursor.close()

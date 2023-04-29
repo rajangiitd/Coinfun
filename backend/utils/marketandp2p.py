@@ -64,7 +64,11 @@ def get_market_data(email_id= None, filename='market_data.json'):   # returns a 
                 item['fav_crypto'] = False
             return market_data
         else:
-            raise Exception('Market data could not be fetched!')
+            for item in market_data:
+                item['symbol'] = (item['symbol'].split("/"))[0]
+                item['fav_crypto'] = False
+            return market_data
+            #raise Exception('Market data could not be fetched!')
 
 def get_fav_page_data(email_id):
     try: 

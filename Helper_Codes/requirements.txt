@@ -1,10 +1,14 @@
-pip3 install mysql-connector-python
-python3 -m pip install mysql-connector-python
-pip3 install flask
-pip3 install mysqlclient
-pip3 install flask_mysqldb
-pip install face-recognition
-pip install google-cloud-vision
-pip install pytest-cov
-pip install coverage
-sudo apt install net-tools
+mysql-connector-python
+flask
+mysqlclient
+flask_mysqldb
+face-recognition
+google-cloud-vision
+pytest-cov
+coverage
+net-tools
+matplotlib
+pandas
+numpy
+cctx
+smtplib
