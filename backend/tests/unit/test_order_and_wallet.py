@@ -5,7 +5,7 @@ def test_add_order_WhenInputIsInvalid():
     email_id = "example@example.com"
     crypto = "BTC"
     last_price = 30000
-    crypto_amount = 0.1
+    crypto_amount = 0.01
     order_type = "BUY"
     with pytest.raises(Exception, match= "Could not add order details to user's order history"):
         add_order(email_id, crypto, last_price, crypto_amount, order_type)
@@ -14,7 +14,7 @@ def test_add_order_WhenInputIsValid():
     email_id = "coinfunnoreply3@gmail.com"
     crypto = "BTC"
     last_price = 30000
-    crypto_amount = 0.1
+    crypto_amount = 0.01
     order_type = "BUY"
     add_order(email_id, crypto, last_price, crypto_amount, order_type)== "Order Successful!"
 

@@ -36,13 +36,15 @@ def get_fav_crypto_list(email_id):
 
 def get_market_data(email_id= None, filename='market_data.json'):   # returns a list of dictionaries containing market data
     try:
-        script_directory = os.path.dirname(os.path.abspath(__file__))
-        # Define the path to the data directory relative to the script directory
+        script_directory = os.path.dirname(os.path.abspath(__file__)) # Define the path to the data directory relative to the script directory
         data_directory = os.path.join(script_directory, 'data')
         file_path = data_directory + '/' + filename
         with open(file_path) as f:  
             market_data = json.load(f) # Access contents of the dictionary
+    except:
+        market_data = []
 
+    try:
         if(email_id == None):
             for item in market_data:
                 item['symbol'] = (item['symbol'].split("/"))[0]
@@ -64,11 +66,7 @@ def get_market_data(email_id= None, filename='market_data.json'):   # returns a 
                 item['fav_crypto'] = False
             return market_data
         else:
-            for item in market_data:
-                item['symbol'] = (item['symbol'].split("/"))[0]
-                item['fav_crypto'] = False
-            return market_data
-            #raise Exception('Market data could not be fetched!')
+            raise Exception('Market data could not be fetched!')
 
 def get_fav_page_data(email_id):
     try: 
@@ -189,10 +187,9 @@ def add_usdt_to_wallet_when_bought_from_p2p(email_id, balance_to_add):
         return True
     except mysql.connector.Error as e:
         db.rollback()
-        raise e
+        return False
     except Exception as e:
-        raise e
-
+        return False
 
 def update_p2p_trade_history(buyer_email_id, seller_email_id, transaction_usdt, bid_type):
     try:
@@ -207,7 +204,6 @@ def update_p2p_trade_history(buyer_email_id, seller_email_id, transaction_usdt, 
             
         bid = cursor.fetchone()
         price = float(bid[3])
-        db.commit()
         
         sql = "INSERT INTO P2PTradeHistoryData (buyer_email_id, seller_email_id, transaction_usdt, price, time_stamp) VALUES (%s, %s, %s, %s, NOW())"
         val = (buyer_email_id, seller_email_id, transaction_usdt, price)
@@ -217,9 +213,10 @@ def update_p2p_trade_history(buyer_email_id, seller_email_id, transaction_usdt, 
         return True
     except mysql.connector.Error as e:
         db.rollback()
-        print(e)
+        cursor.close()
+        return False
     except Exception as e:
-        print(e)
+        cursor.close()
         return False
 
 def update_p2p_bid(email_id, usdt_qnty, buy_type):
@@ -237,12 +234,10 @@ def update_p2p_bid(email_id, usdt_qnty, buy_type):
         if new_transaction_usdt <=0.1:
             query = "DELETE FROM P2PBiddingData WHERE email_id = %s AND buy_type = %s"
             cursor.execute(query, (email_id, buy_type,))
-            db.commit()
         else:
             query = "UPDATE P2PBiddingData SET transaction_usdt = %s, lower_limit = %s, upper_limit = %s WHERE email_id = %s AND buy_type = %s"
             cursor.execute(query, (new_transaction_usdt, new_lower_limit, new_upper_limit, email_id, buy_type,))
-            db.commit()
-        print("here")
+        db.commit()
         cursor.close()
         return True
     except mysql.connector.Error as e:
@@ -252,28 +247,27 @@ def update_p2p_bid(email_id, usdt_qnty, buy_type):
     except:
         cursor.close()
         return False
-        
-
 
 def deduct_usdt_from_wallet_when_released_in_p2p(email_id, buyer_mailid, balance_to_deduct):
     try:
         cursor = db.cursor()
         cursor.execute('SELECT wallet FROM userinfo WHERE email_id = %s', (email_id,))
-        print(cursor, "here 1")
         wallet = cursor.fetchone()[0]
         wallet = json.loads(wallet)
+        print(wallet)
         
         if(wallet['USDT_in_bid']>10 and  balance_to_deduct > wallet['USDT_in_bid']):    # VIP user ad ->Invalid order
             raise Exception("Your amount entered exceeds upper limit of your order amount!")
         elif(wallet['USDT_in_bid'] + 0.1 >= balance_to_deduct):   # VIP valid order is releasing i.e. buy_type=False
             wallet['USDT_in_bid']-=balance_to_deduct              # ad was on buy_page 
+            wallet['USDT_in_bid'] = max(wallet['USDT_in_bid'], 0)
             wallet = json.dumps(wallet)
             update_p2p_trade_history(buyer_mailid, email_id, balance_to_deduct, True)
             update_p2p_bid(email_id, balance_to_deduct, False)
         elif(wallet['USDT']> balance_to_deduct + 0.1 ):    # Normal user is selling to VIP buyer i.e. buy_type=True
             wallet['USDT'] -= balance_to_deduct
+            wallet['USDT'] = max(wallet['USDT'], 0)
             wallet = json.dumps(wallet)
-            print(2)
             update_p2p_trade_history(buyer_mailid, email_id, balance_to_deduct, False)
             update_p2p_bid(buyer_mailid, balance_to_deduct, True)
         elif(wallet['USDT']< balance_to_deduct ):
@@ -286,6 +280,7 @@ def deduct_usdt_from_wallet_when_released_in_p2p(email_id, buyer_mailid, balance
         return True
     except mysql.connector.Error as e:
         db.rollback()
-        raise e
+        return False
     except Exception as e:
-        raise e
+        cursor.close()
+        return False

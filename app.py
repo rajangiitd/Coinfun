@@ -19,7 +19,7 @@ from backend.utils.otp import is_valid_domain, send_otp
 # import mysql.connector
 import pandas as pd
 import matplotlib.pyplot as plt
-from backend.utils.chat import update_chat_image, update_chat_txt, get_chat_list
+from backend.utils.chat import update_chat_txt, get_chat_list
 import json
 from datetime import datetime, timedelta
 import re 
@@ -58,7 +58,7 @@ def login():
             if(account == True):
                 data = get_user_profile(email_id)
                 session['loggedin'] = True
-                session['id'] = data['email_id']
+                session['id'] = data['email_id'].lower()
                 session['username'] = data['username']
                 message = 'Logged in successfully!'
                 cursor.close()
@@ -86,7 +86,7 @@ def register():
         if request.method == 'POST' and 'username' in request.form and 'email' in request.form and 'password' in request.form and 'confirm-password' in request.form and 'phone-number' in request.form:
             username = request.form['username']
             password = request.form['password']
-            email_id = request.form['email']
+            email_id = request.form['email'].lower()
             confirm_password=request.form['confirm-password']
             phone_number = request.form['phone-number']
             pic = ""
