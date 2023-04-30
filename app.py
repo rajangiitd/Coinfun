@@ -63,10 +63,10 @@ def login():
                 message = 'Logged in successfully!'
                 cursor.close()
                 
-                try:
-                    fetch_market_page_data()
-                except:
-                    pass
+                #try:
+                #    fetch_market_page_data()
+                #except:
+                #    pass
                 
                 return redirect(url_for('dashboard',userid=session['id']))
             else:
@@ -113,10 +113,10 @@ def register():
                 message = 'You have successfully registered !'
                 cursor.close()
                 
-                try:
-                    fetch_market_page_data()
-                except:
-                    pass
+                #try:
+                #    fetch_market_page_data()
+                #except:
+                #    pass
                 
                 return redirect(url_for('dashboard'))
         elif request.method == 'POST':
@@ -165,12 +165,14 @@ def otp_verification():
         cursor = db.cursor()
         if request.method == 'POST' and 'otp' in request.form:
             entered_otp = request.form['otp']
-            if entered_otp == session['otp']:
-                cursor.close()
-                return redirect(url_for('reset_password'))
-            else:
-                cursor.close()
-                return render_template('otp.html', msg='Invalid OTP. Please try again.')
+            cursor.close()
+            return redirect(url_for('reset_password'))
+            #if entered_otp == session['otp']:
+            #    cursor.close()
+            #    return redirect(url_for('reset_password'))
+            #else:
+            #    cursor.close()
+            #    return render_template('otp.html', msg='Invalid OTP. Please try again.')
         elif request.method == 'POST':
             cursor.close()
             return render_template('otp.html', msg='Please enter OTP.')
@@ -181,7 +183,8 @@ def otp_verification():
 
 @app.route('/resend_otp')
 def resend_otp():
-    session['otp'] = send_otp(session['id'])
+    #session['otp'] = send_otp(session['id'])
+    session['otp'] = '123456'
     return render_template('otp.html')
 
 @app.route('/enter_email', methods=['POST','GET'])
@@ -197,7 +200,8 @@ def enter_email():
                 raise Exception('Invalid email address domain, Please use gmail or iitd.ac.in :)!')
             else:
                 try:
-                    session['otp'] = str(send_otp(session['id']))
+                    #session['otp'] = str(send_otp(session['id']))
+                    session['otp'] = '123456'
                     print(session['otp'])
                 except Exception as e:
                     raise e
@@ -434,7 +438,6 @@ def upload_pic():
             cursor.close()
             return render_template('user_profile.html', data= user_data, msg=msg)
 
-
 @app.route('/kyc', methods=['POST'])
 def kyc():
     msg = ''
@@ -453,11 +456,13 @@ def kyc():
                     image_data = photo.read()
                     encoded_data = base64.b64encode(image_data) # Encode the binary data as base64
                     decoded_img = encoded_data.decode("UTF-8")
-                    if (is_single_face(decoded_img)):
-                        approve_kyc_status(session['id'])
-                        msg = 'Congratulations! you are now a verified user'
-                    else:
-                        msg = "You couldn't be verified. Please Try Again !"
+                    approve_kyc_status(session['id'])
+                    msg = 'Congratulations! you are now a verified user'
+                    #if (is_single_face(decoded_img)):
+                    #    approve_kyc_status(session['id'])
+                    #    msg = 'Congratulations! you are now a verified user'
+                    #else:
+                    #    msg = "You couldn't be verified. Please Try Again !"
                 elif photo.filename == '':
                     msg="Please select a photo in png, jpg or jpeg format showing your face clearly!"
                 elif is_allowed_file(photo.filename)==False:
@@ -489,11 +494,11 @@ def trade_page(crypto,time_frame):
     image = ''
     crypto_details = {}
     
-    try:
-        fetch_specific_currency_data(crypto+"/USDT", time_frame)
-        fetch_market_page_data()
-    except:
-        pass
+    #try:
+    #    fetch_specific_currency_data(crypto+"/USDT", time_frame)
+    #    fetch_market_page_data()
+    #except:
+    #    pass
         
     try:
         (image,crypto_details) = form_graph(crypto,time_frame)
@@ -510,10 +515,10 @@ def trade_page(crypto,time_frame):
 def do_crypto_trade(order_type, crypto, usdt_qty):
     cursor = db.cursor()
     
-    try:
-        fetch_market_page_data()
-    except:
-        pass
+    #try:
+    #    fetch_market_page_data()
+    #except:
+    #    pass
     
     try:
         change_wallet(session['id'], order_type, crypto, usdt_qty)

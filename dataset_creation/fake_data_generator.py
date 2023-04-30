@@ -190,23 +190,23 @@ def generate_chat_object(id1, id2):
                      "timestamp": datetime.now().isoformat() })
     
     # Second message
-    second_sender = id1 if first_sender == id2 else id2
-    image_path = os.path.join("payment_images", random.choice(os.listdir("payment_images")))
+    #second_sender = id1 if first_sender == id2 else id2
+    #image_path = os.path.join("payment_images", random.choice(os.listdir("payment_images")))
 
-    image_type = os.path.splitext(image_path)[1][1:]
-    image_data_b64 = read_n_write_image_with_sql.convert_to_writable(image_path)
+    #image_type = os.path.splitext(image_path)[1][1:]
+    #image_data_b64 = read_n_write_image_with_sql.convert_to_writable(image_path)
     
-    next_timestamp = datetime.now() + timedelta(minutes=1)
+    #next_timestamp = datetime.now() + timedelta(minutes=1)
     
-    messages.append({"sender": second_sender, 
-                     "message": None, 
-                     "image": {"name": os.path.basename(image_path), "type": image_type, "data": image_data_b64.decode('UTF-8') },
-                     "timestamp": next_timestamp.isoformat() })
+    #messages.append({"sender": second_sender, 
+    #                 "message": None, 
+    #                 "image": {"name": os.path.basename(image_path), "type": image_type, "data": image_data_b64.decode('UTF-8') },
+    #                 "timestamp": next_timestamp.isoformat() })
     
     # Third message
     next_timestamp = datetime.now() + timedelta(minutes=2)
     
-    third_sender = first_sender
+    third_sender = id1 if first_sender == id2 else id2
     messages.append({"sender": third_sender, 
                      "message": random.choice(["Thanks, released!", "Released", "Releasing"]), 
                      "image": None,
@@ -215,9 +215,9 @@ def generate_chat_object(id1, id2):
     # Fourth message
     next_timestamp = datetime.now() + timedelta(minutes=3)
     
-    fourth_sender = second_sender
+    fourth_sender = first_sender
     messages.append({"sender": fourth_sender, 
-                     "message": "Thanks", 
+                     "message": "Thanks for releasing", 
                      "image": None,
                      "timestamp": next_timestamp.isoformat() })
     
@@ -247,8 +247,8 @@ def generate_fake_P2PTradeHistoryData_chat(datasize):
     mycursor.execute(sql)
     mydb.commit()
     
-    if(buyer_email_id>seller_email_id):
-      buyer_email_id, seller_email_id = seller_email_id, buyer_email_id
+    #if(buyer_email_id>seller_email_id):
+    #  buyer_email_id, seller_email_id = seller_email_id, buyer_email_id
 
     if(chat_done[(buyer_email_id, seller_email_id)]==False):
       chat_done[(buyer_email_id, seller_email_id)] = True
@@ -259,7 +259,7 @@ def generate_fake_P2PTradeHistoryData_chat(datasize):
       mydb.commit()
     print("P2PTradeHistoryData and chat table data addition done for ", buyer_email_id, seller_email_id)
         
-data_size = 45
+data_size = 60
 generate_fake_userinfo_p2pbidding_crptotradinghistory_data(data_size)
 print("3 tables done")
 generate_fake_P2PTradeHistoryData_chat(data_size)
