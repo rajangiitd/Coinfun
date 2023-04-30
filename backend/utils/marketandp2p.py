@@ -79,7 +79,7 @@ def get_fav_page_data(email_id):
     except Exception as e:
         raise e
 
-def get_p2p_buy_page_data():
+def get_p2p_buy_page_data():        # returns a list of dict
     try:
         cursor = db.cursor()
         cursor.execute('SELECT * FROM P2PBiddingData where buy_type = false')
@@ -99,7 +99,7 @@ def get_p2p_buy_page_data():
     except:
         raise Exception('Sorry! Bidding details for Buying page could not be fetched !')
 
-def get_p2p_sell_page_data():
+def get_p2p_sell_page_data():   # returns a list of dict
     try:
         cursor = db.cursor()
         cursor.execute('SELECT * FROM P2PBiddingData where buy_type = True')
