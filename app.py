@@ -537,8 +537,10 @@ def chat_buy(seller_mailID):
         print('in post')
         message = request.form["messageInput"]
         try:
-            print('updating')
-            update_chat_txt(session['id'],session['id'],seller_mailID,message)
+            try:
+                update_chat_txt(session['id'],session['id'],seller_mailID,message)
+            except:
+                print("update_chat_txt_failed")
             print('update done')
             cursor.close()
             return redirect(url_for('chat_buy',seller_mailID=seller_mailID))
@@ -554,7 +556,7 @@ def chat_buy(seller_mailID):
     elif request.method == "POST" and 'photo' in request.files:
         photo = request.files['photo']
         try:
-            update_chat_image(session['id'],session['id'],seller_mailID,photo)
+            #update_chat_image(session['id'],session['id'],seller_mailID,photo)
             cursor.close()
             return redirect(url_for('chat_buy',seller_mailID=seller_mailID))
         except Exception as e:
@@ -596,7 +598,10 @@ def chat_sell(buyer_mailID):
         message = request.form["messageInput"]
         print('hi')
         try:
-            update_chat_txt(session['id'],buyer_mailID,session['id'],message)
+            try:
+                update_chat_txt(session['id'],buyer_mailID,session['id'],message)
+            except:
+                print("update_chat_txt_failed")
             cursor.execute('SELECT chat_messages FROM chat WHERE (email_id1 = %s AND email_id2 = %s) OR (email_id1 = %s AND email_id2 = %s)',(session['id'],buyer_mailID,buyer_mailID,session['id'],))
             print(cursor.fetchone()[0])
             print(session['id'])
