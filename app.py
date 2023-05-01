@@ -429,14 +429,16 @@ def upload_pic():
                     return jsonify({'msg':msg, 'profile_pic':user_data['profile_pic']})
                 else:
                     raise Exception("Only png , jpg and jpeg format is allowed")
+        except mysql.connector.Error as e:
+            db.rollback()
         except Exception as e:
             if(str(e)=='Only png , jpg and jpeg format is allowed'):
                 msg = str(e)
             else:
                 msg = "IMAGE CANNOT BE UPDATED!"
-            user_data= get_user_profile(session['id'])
-            cursor.close()
-            return render_template('user_profile.html', data= user_data, msg=msg)
+        user_data= get_user_profile(session['id'])
+        cursor.close()
+        return render_template('user_profile.html', data= user_data, msg=msg)
 
 @app.route('/kyc', methods=['POST'])
 def kyc():

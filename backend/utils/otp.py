@@ -6,11 +6,15 @@ def is_valid_domain(email):
     try:
         ## Takes a string as input a checks whether the email has valid domain or not
         valid_domains = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com' , 'iitd.ac.in']
-        domain = email.split('@')[-1]
-        if domain in valid_domains:
-            return True
-        else:
-            return False
+        # domain = email.split('@')[-1]
+        for domain in valid_domains:
+            if(email.endswith(domain)):
+                return True
+        return False
+        #if domain in valid_domains:
+        #    return True
+        #else:
+        #    return False
     except Exception as e:
         raise Exception("Couldn't validate email domain")
 
